@@ -18,7 +18,11 @@
           Flickr Account:
         </td>
         <td>
-          <strong>${c.fbuser.first_name} ${c.fbuser.last_name}</strong>
+          % if c.flickr_user:
+          <strong>${c.flickr_user.username}</strong>
+          % else:
+          <a href="${c.flickr_connect_url}">Connect</a>
+          % endif
         </td>
       </tr>
       <tr>

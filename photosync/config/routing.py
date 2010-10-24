@@ -5,6 +5,7 @@ may take precedent over the more generic routes. For more information
 refer to the routes manual at http://routes.groovie.org/docs/
 """
 from routes import Mapper
+from pylons import session
 
 def make_map(config):
     """Create, configure and return the routes Mapper"""
@@ -28,5 +29,6 @@ def make_map(config):
     map.connect('index', '/', controller='frontpage', action='index')
     map.connect('logout', '/logout', controller='logout', action='index')
     map.connect('fb_auth_redirect', '/fb/auth_redirect', controller='fbauth', action='index')
+    map.connect('flickr_auth_redirect', '/flickr/auth_redirect', controller='flickrauth', action='index')
 
     return map

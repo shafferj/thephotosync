@@ -4,17 +4,24 @@ from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
 from photosync.lib.base import BaseController, render
-from photosync import fb
-from photosync.model import User
+from photosync.flickr import FlickrAPI
 from photosync.model.meta import Session
+from photosync.model import User
+
 log = logging.getLogger(__name__)
 
-class FbauthController(BaseController):
+class FlickrauthController(BaseController):
 
     def index(self):
-        code = request.GET.getone('code')
-        token = fb.get_access_token(code)
-        fbuser = fb.GraphUser(token)
+        flickr = FlickrAPI()
+        token = flickr.get_token(request.GET.getone('frob'))
+
+        session['flickr_token'] = token
+        session.save()
+
+        flickr = FlickrAPI(token)
+        result = flickr.auth_checkToken()
+        nsid = result[0][2].get('nsid')
 
         if session.get('user_id'):
             # a user is already logged in
@@ -22,22 +29,18 @@ class FbauthController(BaseController):
         else:
             # the user is not already logged in, let's see if they have
             # already created an account before
-            user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
+            user = Session.query(User).filter_by(flickr_nsid=nsid).first()
 
         if not user:
             # the user does not have an account.  We need to create a new one
             # for them.
-            user = User(fbuser.id)
+            user = User(flickr_nsid=nsid)
             Session.add(user)
             Session.commit()
-            user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
+            user = Session.query(User).filter_by(flickr_nsid=flickr_nsid).first()
 
         session['user_id'] = user.id
-        session['fb_access_token'] = token
+        session['flickr_token'] = token
         session.save()
-        log.info("Logged in user %s %s: %s",
-                 fbuser.first_name,
-                 fbuser.last_name,
-                 user)
+        log.info("Logged in user %s", user)
         redirect(url('index'))
-
