@@ -1,0 +1,91 @@
+html {
+    padding: 0px;
+    margin: 0px;
+}
+body {
+    padding: 0px;
+    margin: 0px;
+    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+}
+
+h1 {
+    font-size: 200%
+    font-weight: bold;
+}
+
+strong {
+    font-weight: bold;
+}
+
+a,
+a:visited {
+    color: blue;
+}
+
+#header {
+    margin: 0px;
+    background: black;
+    color: white;
+    padding-top: 10px;
+    height: 25px;
+}
+
+#header h1 {
+    font-size: 20px;
+}
+
+#header-links {
+    border: 1px solid #667;
+    border-bottom: 0px;
+    float: right;
+    background: #445;
+    padding: 4px 10px 0;
+    line-height: 20px;
+}
+
+#header-links a {
+    color: #bbf;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div.container {
+    width: 750px;
+    margin: auto;
+}
+
+#main {
+    padding: 10px;
+    border: 1px solid black;
+    border-top: 0px;
+    min-height: 300px;
+}
+
+#footer {
+    text-align: right;
+}
+
+.box {
+    border: 1px solid black;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    width: 400px;
+    margin: auto;
+}
+.box h1 {
+    background: black;
+    color: white;
+    padding: 5px 5px 0;
+    font-size: 15px;
+}
+.box .box-content {
+    padding: 5px;
+}
+
+table {
+    cell-spacing: collapse;
+}
+
+td {
+    padding: 10px;
+}
