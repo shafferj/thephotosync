@@ -36,5 +36,8 @@ setup(
 
     [paste.app_install]
     main = pylons.util:PylonsInstaller
+
+    [console_scripts]
+    photosync_worker = photosync.worker.run:main
     """,
 )
