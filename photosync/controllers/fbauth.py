@@ -14,7 +14,7 @@ class FbauthController(BaseController):
     def index(self):
         code = request.GET.getone('code')
         token = fb.get_access_token(code)
-        fbuser = fb.GraphUser(token)
+        fbuser = fb.GraphUser(access_token=token)
 
         if session.get('user_id'):
             # a user is already logged in

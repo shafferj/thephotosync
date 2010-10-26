@@ -8,13 +8,22 @@ body {
     font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
 }
 
+h1,h2,h3,h4,h5,h6 {
+    font-weight: bold;
+}
 h1 {
     font-size: 200%
-    font-weight: bold;
 }
 
 strong {
     font-weight: bold;
+}
+table {
+    cell-spacing: collapse;
+}
+
+td {
+    padding: 10px;
 }
 
 a,
@@ -32,6 +41,10 @@ a:visited {
 
 #header h1 {
     font-size: 20px;
+}
+#header h1 a {
+    color: white;
+    text-decoration: none;
 }
 
 #header-links {
@@ -82,10 +95,27 @@ div.container {
     padding: 5px;
 }
 
-table {
-    cell-spacing: collapse;
+ul.albums li {
+    border-bottom: 1px solid #ddd;
+    padding: 5px;
 }
 
-td {
-    padding: 10px;
+.box-buttons {
+    text-align: right;
+    border-top: 1px solid black;
+    padding: 5px;
+    background: #eee;
+    -moz-border-radius: 0px 0px 5px 5px;
+}
+
+.button {
+    -moz-border-radius: 5px;
+    border: 1px solid blue;
+    background: #ddf;
+    color: black;
+    padding: 0 5px;
+    line-height: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-block;
 }

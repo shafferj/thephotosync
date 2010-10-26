@@ -11,6 +11,8 @@
         </td>
         <td>
           <strong>${c.fbuser.first_name} ${c.fbuser.last_name}</strong>
+          &middot;
+          <a href="${url('fb_albums')}">details</a>
         </td>
       </tr>
       <tr>
@@ -30,9 +32,12 @@
           Picassa:
         </td>
         <td>
-          <strong>${c.fbuser.first_name} ${c.fbuser.last_name}</strong>
+          Not implemented yet :(
         </td>
       </tr>
     </table>
+  </div>
+  <div class="box-buttons">
+    <a class="button" href="${url('sync')}">Sync</a>
   </div>
 </div>

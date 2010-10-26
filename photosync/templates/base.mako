@@ -11,12 +11,12 @@
   <body>
     <div id="header">
       <div class="container">
-        % if session.get('logged_in'):
+        % if session.get('user_id'):
         <div id="header-links">
           <a href="/logout">logout</a>
         </div>
         % endif
-        <h1>PhotoSync</h1>
+        <h1><a href="/">PhotoSync</a></h1>
       </div>
     </div>
     <div id="main" class="container">
