@@ -1,6 +1,8 @@
 import logging
 
 from gearman import GearmanWorker
+from photosync.model.meta import Session
+from photosync.model import User, SyncRecord
 
 log = logging.getLogger(__name__)
 

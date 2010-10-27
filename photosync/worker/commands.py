@@ -2,8 +2,10 @@ import os
 import ConfigParser
 
 from paste.script.command import Command, BadCommand
+from sqlalchemy import engine_from_config
 
 from photosync.worker.run import run_worker
+from photosync.model import init_model
 
 CONFIG_SECTION = 'photosync:worker'
 
@@ -56,14 +58,17 @@ class RunWorkerCommand(Command):
         if not parser.has_section(CONFIG_SECTION):
             raise BadCommand('Error: %s missing %s configuration section' % \
                                  (config_file, CONFIG_SECTION))
+        config = dict(parser.items(CONFIG_SECTION, vars={'here':here_dir}))
 
         def get_or_raise(key):
-            val = parser.get(CONFIG_SECTION, key)
-            if not val:
+            if key not in config:
                 raise BadCommand(
                     'Error: %s %s configuration section is missing a '
                     'value for %s' % (config_file, CONFIG_SECTION, key))
-            return val
+            return config[key]
+
+        engine = engine_from_config(config, 'sqlalchemy.')
+        init_model(engine)
 
         servers = get_or_raise('servers').split(' ')
         client_id = get_or_raise('id')
