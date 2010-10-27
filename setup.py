@@ -18,6 +18,7 @@ setup(
         "flickrapi",
         "gdata",
         "pycurl",
+        "gearman",
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
@@ -36,6 +37,9 @@ setup(
 
     [paste.app_install]
     main = pylons.util:PylonsInstaller
+
+    [paste.paster_command]
+    runworker = photosync.worker.commands:RunWorkerCommand
 
     [console_scripts]
     photosync_worker = photosync.worker.run:main
