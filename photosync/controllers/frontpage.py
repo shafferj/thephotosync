@@ -17,7 +17,11 @@ class FrontpageController(BaseController):
     def home(self):
         f = flickr.FlickrAPI()
         c.flickr_connect_url = f.web_login_url(perms='write')
-        c.fb_connect_url = fb.get_authorization_url(['user_photos', 'publish_stream'])
+        c.fb_connect_url = fb.get_authorization_url([
+                'user_photos',
+                'publish_stream',
+                'offline_access',
+                ])
         c.fbuser = fb.GraphUser()
         c.flickr_user = None
         if session.get('flickr_token'):

@@ -1,10 +1,13 @@
 """The application's model objects"""
 import json
 import datetime
+import uuid
 
 from pylons import session
 
-from sqlalchemy import orm, Column, Unicode, UnicodeText, Integer, ForeignKey, Date
+from gearman.client import GearmanClient
+
+from sqlalchemy import orm, Column, String, Unicode, UnicodeText, Integer, ForeignKey, Date
 from sqlalchemy.orm import relation, backref
 from sqlalchemy import types
 from photosync.model.meta import Session, Base
@@ -49,6 +52,59 @@ class User(Base):
     def __repr__(self):
         return "<User id=%s fb_uid=%s flickr_nsid=%s>" % (
             self.id, self.fb_uid, self.flickr_nsid)
+
+    __str__ = __unicode__
+
+
+class AsyncTask(Base):
+    __tablename__ = 'async_task'
+
+    id = Column('id', Integer, primary_key=True)
+    gearman_unique = Column('gearman_unique', String(100))
+    gearman_data = Column('gearman_data', Json)
+    total_units = Column('total_units', Integer)
+    completed_units = Column('completed_units', Integer)
+    start_time = Column('start_time', Date)
+    end_time = Column('end_time', Date)
+    last_update_time = Column('last_update_time', Date)
+    status_code = Column('status_code', Integer)
+    status_data = Column('status_data', Json)
+
+
+    def __init__(self):
+        self.gearman_unique = str(uuid.uuid4())
+
+    def set_status(self, completed, total, data, worker=None, job=None):
+        self.completed_units = completed
+        self.total_units = total
+        self.status_data = data
+        self.last_update_time = datetime.datetime.now()
+        if not self.start_time:
+            self.start_time = self.last_update_time
+
+        if worker and job:
+            worker.send_job_status(job, self.completed_units, self.total_units)
+            if data:
+                worker.send_job_data(job, str(data))
+
+    def submit_job(self, gearman_task, data, **kwargs):
+        Session.add(self)
+        Session.commit()
+        client = GearmanClient(['localhost:4730'])
+        request = client.submit_job(
+            gearman_task,
+            json.dumps(data),
+            unique=str(self.gearman_unique),
+            **kwargs)
+        self.gearman_data = request.job.to_dict()
+        Session.commit()
+        return request
+
+    def __unicode__(self):
+        return u"%s/%s %s: %r (%r)" % (
+            self.completed_units, self.total_units,
+            self.status_code, self.status_data,
+            self.gearman_data)
 
     __str__ = __unicode__
 

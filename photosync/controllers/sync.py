@@ -6,16 +6,36 @@ import tempfile
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
+from gearman.client import GearmanClient
+
 from photosync.lib.base import BaseController, render
 from photosync import fb
 from photosync import flickr
 from photosync.model.meta import Session
-from photosync.model import SyncRecord
+from photosync.model import SyncRecord, AsyncTask
 
 log = logging.getLogger(__name__)
 
 
 class SyncController(BaseController):
+
+    def long_ping(self):
+        client = GearmanClient(['localhost:4730'])
+        if 'task_id' in session:
+            task = Session.query(AsyncTask).filter_by(id=session['task_id']).first()
+            if task:
+                return unicode(task)
+
+        task = AsyncTask()
+        task.submit_job(
+            'long_ping',
+            int(request.GET.getone('seconds')),
+            background=True)
+
+        session['task_id'] = task.id
+        session.save()
+
+        return "new job started"
 
     def index(self):
         fb_user = fb.GraphUser()
@@ -86,8 +106,5 @@ class SyncController(BaseController):
                         sync.status = SyncRecord.STATUS_FAILED
                     Session.add(sync)
                     Session.commit()
-
-
-
 
         return 'Hello World'
