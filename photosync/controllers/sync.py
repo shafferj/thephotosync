@@ -24,7 +24,11 @@ class SyncController(BaseController):
         if 'task_id' in session:
             task = Session.query(AsyncTask).filter_by(id=session['task_id']).first()
             if task:
-                return unicode(task)
+                c.progressbar = render(
+                    'widgets/progressbar.mako',
+                    {'percentComplete':task.percentComplete,
+                     'message':task.status_data})
+                return render('progresspage.mako')
 
         task = AsyncTask()
         task.submit_job(

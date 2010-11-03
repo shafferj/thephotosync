@@ -119,3 +119,13 @@ ul.albums li {
     font-weight: bold;
     display: inline-block;
 }
+
+.progressbar .bar {
+    height: 20px;
+    border: 1px solid black;
+}
+
+.progressbar .progress {
+    height: 100%;
+    background: blue;
+}

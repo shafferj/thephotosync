@@ -82,11 +82,6 @@ class AsyncTask(Base):
         if not self.start_time:
             self.start_time = self.last_update_time
 
-        if worker and job:
-            worker.send_job_status(job, self.completed_units, self.total_units)
-            if data:
-                worker.send_job_data(job, str(data))
-
     def submit_job(self, gearman_task, data, **kwargs):
         Session.add(self)
         Session.commit()
@@ -99,6 +94,10 @@ class AsyncTask(Base):
         self.gearman_data = request.job.to_dict()
         Session.commit()
         return request
+
+    @property
+    def percentComplete(self):
+        return 100.0*self.completed_units/self.total_units
 
     def __unicode__(self):
         return u"%s/%s %s: %r (%r)" % (
