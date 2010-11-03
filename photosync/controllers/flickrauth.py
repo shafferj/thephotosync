@@ -34,7 +34,7 @@ class FlickrauthController(BaseController):
         if not user:
             # the user does not have an account.  We need to create a new one
             # for them.
-            user = User(flickr_nsid=nsid)
+            user = User(flickr_nsid=nsid, flickr_token=token)
             Session.add(user)
             Session.commit()
             user = Session.query(User).filter_by(flickr_nsid=flickr_nsid).first()

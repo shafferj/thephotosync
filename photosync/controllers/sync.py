@@ -21,25 +21,11 @@ class SyncController(BaseController):
 
     def long_ping(self):
         client = GearmanClient(['localhost:4730'])
-        if 'task_id' in session:
-            task = Session.query(AsyncTask).filter_by(id=session['task_id']).first()
-            if task:
-                c.progressbar = render(
-                    'widgets/progressbar.mako',
-                    {'percentComplete':task.percentComplete,
-                     'message':task.status_data})
-                return render('progresspage.mako')
-
-        task = AsyncTask()
-        task.submit_job(
+        AsyncTask().submit_job(
             'long_ping',
             int(request.GET.getone('seconds')),
             background=True)
-
-        session['task_id'] = task.id
-        session.save()
-
-        return "new job started"
+        redirect(url('index'))
 
     def index(self):
         fb_user = fb.GraphUser()

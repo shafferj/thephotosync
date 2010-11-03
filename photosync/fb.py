@@ -69,7 +69,15 @@ class Graph(object):
 
     def __init__(self, access_token=None, cache=True):
         if not access_token:
-            access_token = session.get('fb_access_token')
+            if 'fb_access_token' in session:
+                access_token = session['fb_access_token']
+            elif 'user_id' in session:
+                user = User.get_current_user()
+                if user and user.fb_access_token:
+                    session['fb_access_token'] = user.fb_access_token
+                    session.save()
+                    access_token = user.fb_access_token
+
         self.access_token = access_token
         self.cache = cache
         self._cache = {}

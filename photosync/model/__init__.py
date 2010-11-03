@@ -7,7 +7,7 @@ from pylons import session
 
 from gearman.client import GearmanClient
 
-from sqlalchemy import orm, Column, String, Unicode, UnicodeText, Integer, ForeignKey, Date
+from sqlalchemy import orm, Column, String, Unicode, UnicodeText, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relation, backref
 from sqlalchemy import types
 from photosync.model.meta import Session, Base
@@ -40,11 +40,14 @@ class User(Base):
     id = Column('id', Integer, primary_key=True)
     fb_uid = Column('fb_uid', Integer)
     flickr_nsid = Column('flickr_nsid', UnicodeText)
-#    fb_access_token = Column('fb_access_token', UnicodeText)
+    flickr_token = Column('flickr_token', UnicodeText)
+    fb_access_token = Column('fb_access_token', UnicodeText)
 
-    def __init__(self, fb_uid=None, flickr_nsid=None):
+    def __init__(self, fb_uid=None, fb_access_token=None, flickr_nsid=None, flickr_token=None):
         self.fb_uid = fb_uid
         self.flickr_nsid = flickr_nsid
+        self.fb_access_token = fb_access_token
+        self.flickr_token = flickr_token
 
     def __unicode__(self):
         return u'%s' % self.id
@@ -55,6 +58,11 @@ class User(Base):
 
     __str__ = __unicode__
 
+    @staticmethod
+    def get_current_user():
+        if 'user_id' in session:
+            return Session.query(User).filter_by(id=session.get('user_id')).first()
+
 
 class AsyncTask(Base):
     __tablename__ = 'async_task'
@@ -64,15 +72,16 @@ class AsyncTask(Base):
     gearman_data = Column('gearman_data', Json)
     total_units = Column('total_units', Integer)
     completed_units = Column('completed_units', Integer)
-    start_time = Column('start_time', Date)
-    end_time = Column('end_time', Date)
-    last_update_time = Column('last_update_time', Date)
+    start_time = Column('start_time', DateTime)
+    end_time = Column('end_time', DateTime)
+    last_update_time = Column('last_update_time', DateTime)
     status_code = Column('status_code', Integer)
     status_data = Column('status_data', Json)
-
+    user_id = Column('user_id', Integer)
 
     def __init__(self):
         self.gearman_unique = str(uuid.uuid4())
+        self.user_id = session.get('user_id')
 
     def set_status(self, completed, total, data, worker=None, job=None):
         self.completed_units = completed
@@ -81,6 +90,8 @@ class AsyncTask(Base):
         self.last_update_time = datetime.datetime.now()
         if not self.start_time:
             self.start_time = self.last_update_time
+        if self.completed_units >= self.total_units:
+            self.end_time = self.last_update_time
 
     def submit_job(self, gearman_task, data, **kwargs):
         Session.add(self)
@@ -97,7 +108,8 @@ class AsyncTask(Base):
 
     @property
     def percentComplete(self):
-        return 100.0*self.completed_units/self.total_units
+        if self.completed_units is not None and self.total_units:
+            return 100.0*self.completed_units/self.total_units
 
     def __unicode__(self):
         return u"%s/%s %s: %r (%r)" % (
@@ -121,7 +133,7 @@ class SyncRecord(Base):
     id = Column('id', Integer, primary_key=True)
     fbid = Column('fbid', Integer)
     flickrid = Column('flickrid', Integer)
-    timestamp = Column('timestamp', Date)
+    timestamp = Column('timestamp', DateTime)
     user_id = Column('user_id', Integer, ForeignKey('users.id'))
     status = Column('status', Integer)
     type = Column('type', Integer)

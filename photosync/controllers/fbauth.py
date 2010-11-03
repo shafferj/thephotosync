@@ -27,7 +27,8 @@ class FbauthController(BaseController):
         if not user:
             # the user does not have an account.  We need to create a new one
             # for them.
-            user = User(fbuser.id)
+            user = User(fb_uid=fbuser.id,
+                        fb_access_token=token)
             Session.add(user)
             Session.commit()
             user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
