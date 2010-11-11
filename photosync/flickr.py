@@ -3,6 +3,7 @@ import urllib
 from pylons import session, app_globals as g
 
 from photosync.lazy import lazy
+from photosync.model import User
 
 class FlickrAPI(flickrapi.FlickrAPI):
 
@@ -36,3 +37,10 @@ class FlickrUser(FlickrAPI):
 def get_authorization_url(perms=''):
     return FlickrAPI().web_login_url(perms=perms)
 
+
+def get_url(token, **params):
+    fk = FlickrAPI(token)
+    params.setdefault('auth_token', fk.token_cache.token)
+    params.setdefault('api_key', fk.api_key)
+    params.setdefault('format', 'json')
+    return "http://" + fk.flickr_host + fk.flickr_rest_form + '?' + fk.encode_and_sign(params)

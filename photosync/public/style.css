@@ -57,9 +57,14 @@ a:visited {
 }
 
 #header-links a {
-    color: #bbf;
+    color: #ddd;
     font-weight: bold;
     text-decoration: none;
+    padding: 0 5px;
+}
+
+#header-links a:hover {
+    color: #fff;
 }
 
 div.container {

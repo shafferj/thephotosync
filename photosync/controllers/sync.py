@@ -2,6 +2,7 @@ import os
 import logging
 import urllib2
 import tempfile
+import json
 
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -11,6 +12,7 @@ from gearman.client import GearmanClient
 from photosync.lib.base import BaseController, render
 from photosync import fb
 from photosync import flickr
+from photosync.worker import tasks
 from photosync.model.meta import Session
 from photosync.model import SyncRecord, AsyncTask
 
@@ -20,10 +22,13 @@ log = logging.getLogger(__name__)
 class SyncController(BaseController):
 
     def long_ping(self):
-        client = GearmanClient(['localhost:4730'])
+        tasks.LongPing.submit(int(request.GET.getone('seconds')))
+        redirect(url('index'))
+
+    def full_sync(self):
         AsyncTask().submit_job(
-            'long_ping',
-            int(request.GET.getone('seconds')),
+            'full_sync',
+            {'user_id':session.get('user_id')},
             background=True)
         redirect(url('index'))
 

@@ -1,10 +1,12 @@
+import json
 import time
 import logging
 
-from gearman import GearmanWorker
+import beanstalkc
 from photosync.model.meta import Session
 from photosync.model import User, SyncRecord, AsyncTask
-from photosync.worker.tasks import LongPing
+from photosync.worker import tasks
+from photosync.worker.job import Job
 
 log = logging.getLogger(__name__)
 
@@ -24,11 +26,18 @@ def task_ping(worker, job):
 #        time.sleep(1)
 #    return "all done"
 
-def run_worker(servers, client_id):
-    log.info("Starting gearman worker '%s'", client_id)
-    log.info("Connecting to servers: %s", ' '.join(servers))
-    worker = GearmanWorker(servers)
-    worker.set_client_id(client_id)
-    worker.register_task('ping', task_ping)
-    worker.register_task('long_ping', LongPing.runner)
-    worker.work()
+def run_worker(host, port, tubes=()):
+
+    log.info("Starting photosync worker")
+    log.info("Connecting to server: %s:%s", host, port)
+
+    beanstalk = beanstalkc.Connection(host=host, port=int(port))
+
+    log.info("Watching tubes: %s", ', '.join(tubes))
+    for tube in tubes:
+        beanstalk.watch(tube)
+
+    while True:
+        job = beanstalk.reserve()
+        log.info("Processing job %s", job.jid)
+        Job(beanstalk_job=job).run()

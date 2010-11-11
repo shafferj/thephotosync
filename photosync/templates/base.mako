@@ -16,6 +16,8 @@
         % if session.get('user_id'):
         <div id="header-links">
           <a href="/logout">logout</a>
+          &middot;
+          <a href="/settings">settings</a>
         </div>
         % endif
         <h1><a href="/">PhotoSync</a></h1>

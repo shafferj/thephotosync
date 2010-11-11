@@ -27,7 +27,7 @@ class FrontpageController(BaseController):
         if session.get('flickr_token'):
             c.flickr_user = flickr.FlickrUser()
 
-        c.tasks = Session.query(AsyncTask).filter_by(user_id=session.get('user_id')).all()
+        c.tasks = AsyncTask.get_for_user()
 
         return render('/homepage.mako')
 

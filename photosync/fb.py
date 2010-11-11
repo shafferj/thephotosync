@@ -51,6 +51,25 @@ def get_access_token(code):
         return None
 
 
+def get_privacy_options():
+    return (
+        ('FB_DEFAULT','My default setting on Facbeook'),
+        ('EVERYONE','Everyone'),
+        ('ALL_FRIENDS','Friends Only'),
+        ('NETWORKS_FRIENDS','Friends and Networks'),
+        ('FRIENDS_OF_FRIENDS','Friends of Friends'),
+        ('ONLY_ME','Only Me'))
+
+def get_privacy_api_value(privacy):
+    if privacy == 'ONLY_ME':
+        return {'value':'CUSTOM',
+                'friends':'SELF'}
+    elif privacy in ('FB_DEFAULT', None):
+        return None
+
+    return {'value':privacy}
+
+
 class File(object):
 
     def __init__(self, path):
@@ -90,9 +109,14 @@ class Graph(object):
 
         if not result:
             log.info("Loading %s", path)
-            result = json.loads(urllib2.urlopen(self.get_url(path)).read())
-            if self.cache:
-                self._cache[path] = result
+            try:
+                result = json.loads(urllib2.urlopen(self.get_url(path)).read())
+            except urllib2.HTTPError, e:
+                log.warn("Failed to load %s: %r", self.get_url(path), e)
+                result = None
+            else:
+                if self.cache:
+                    self._cache[path] = result
         return result
 
     def post(self, path, data):
@@ -117,7 +141,12 @@ class Graph(object):
         c.setopt(c.VERBOSE, 1)
         response = StringIO.StringIO()
         c.setopt(c.WRITEFUNCTION, response.write)
-        c.perform()
+        while True:
+            try:
+                c.perform()
+                break
+            except Exception, e:
+                import pdb; pdb.set_trace()
         c.close()
         result = json.loads(response.getvalue())
         return result
@@ -175,7 +204,7 @@ class GraphUser(GraphObject):
     first_name = property(lambda self: self.data['first_name'])
     last_name  = property(lambda self: self.data['last_name'])
 
-    albums     = lazy(lambda self: GraphAlbums())
+    albums     = lazy(lambda self: GraphAlbums(access_token=self.access_token))
 
 
 class GraphAlbum(GraphObject):
@@ -184,7 +213,7 @@ class GraphAlbum(GraphObject):
     link       = property(lambda self: self.data['link'])
     count      = property(lambda self: self.data['count'])
 
-    photos     = lazy(lambda self: GraphPhotos(self.id))
+    photos     = lazy(lambda self: GraphPhotos(self.id, access_token=self.access_token))
 
 
 class GraphAlbums(GraphObjectList):
@@ -192,9 +221,13 @@ class GraphAlbums(GraphObjectList):
     path = '/me/albums'
     object_class = GraphAlbum
 
-    def add(self, name, description):
-        result = self.post(self.path, {'name':name,
-                                       'description':description})
+    def add(self, name, description, privacy=None):
+        params = {'name':name,
+                  'description':description}
+        privacy = get_privacy_api_value(privacy)
+        if privacy:
+            params['privacy'] = json.dumps(privacy)
+        result = self.post(self.path, params)
         if result.get('id'):
             return GraphAlbum(id=result.get('id'), access_token=self.access_token)
         return None
@@ -210,8 +243,8 @@ class GraphPhotos(GraphObjectList):
 
     object_class = GraphPhoto
 
-    def __init__(self, album_id):
-        super(GraphPhotos, self).__init__()
+    def __init__(self, album_id, access_token=None):
+        super(GraphPhotos, self).__init__(access_token=access_token)
         self.path = '/%s/photos' % album_id
 
     def add(self, filename, message):

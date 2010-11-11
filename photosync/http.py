@@ -7,6 +7,8 @@ import urllib
 import logging
 from cStringIO import StringIO
 
+from photosync.lazy import lazy
+
 log = logging.getLogger(__name__)
 
 class File(object):
@@ -25,12 +27,42 @@ class File(object):
 
 class Request(object):
 
-    def __init__(self, url, method="GET", params=None, headers=None):
-        self.url = url
+    def __init__(self,
+                 url,
+                 method="GET",
+                 params=None,
+                 headers=None,
+                 filename=None,
+                 verbose=False):
+        self.url = str(url)
         self.method = method
         self.params = params or {}
         self.headers = headers or {}
-        self.response = StringIO()
+        self.filename = filename
+        self.verbose = verbose
+
+    @lazy
+    def response(self):
+        if self.filename:
+            return open(self.filename, 'w')
+        else:
+            return StringIO()
+
+    def read_response(self):
+        if self.filename:
+            self.response.close()
+            f = open(self.filename, 'r')
+            result = f.read()
+            f.close()
+            return result
+        else:
+            return self.response.getvalue()
+
+
+class JsonRequest(Request):
+
+    def read_response(self):
+        return json.loads(super(JsonRequest, self).read_response())
 
 
 class Fetcher(object):
@@ -75,13 +107,16 @@ class Fetcher(object):
 
                 c = freelist.pop()
                 c.setopt(c.WRITEFUNCTION, request.response.write)
-                c.setopt(c.URL, request.url)
-                c.setopt(c.VERBOSE, 1)
+                c.setopt(c.URL, str(request.url))
+                c.setopt(c.VERBOSE, 1 if request.verbose else 0)
 
                 if request.method == "POST":
                     c.setopt(c.HTTPPOST, post_fields)
                 else:
-                    c.setopt(c.URL, request.url+'?'+urllib.urlencode(request.params))
+                    url = request.url
+                    if request.params:
+                        url += '?'+urllib.urlencode(request.params)
+                    c.setopt(c.URL, url)
 
                 c.request = request
                 self._curler.add_handle(c)
@@ -125,5 +160,5 @@ if __name__ == '__main__':
     for request in requests:
         print
         print request.url
-        print request.response.getvalue()
+        print request.read_response()
     print "finished in", time.time()-start, "seconds"

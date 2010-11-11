@@ -1,7 +1,10 @@
 import os
 import ConfigParser
 
+import paste.fixture
+import paste.registry
 from paste.script.command import Command, BadCommand
+from paste.deploy import loadapp
 from sqlalchemy import engine_from_config
 
 from photosync.worker.run import run_worker
@@ -70,6 +73,21 @@ class RunWorkerCommand(Command):
         engine = engine_from_config(config, 'sqlalchemy.')
         init_model(engine)
 
-        servers = get_or_raise('servers').split(' ')
-        client_id = get_or_raise('id')
-        run_worker(servers, client_id)
+        # Load the wsgi app first so that everything is initialized right
+        wsgiapp = loadapp(config_name, relative_to=here_dir)
+        test_app = paste.fixture.TestApp(wsgiapp)
+
+        # Query the test app to setup the environment
+        tresponse = test_app.get('/_test_vars')
+        request_id = int(tresponse.body)
+
+        # Restore the state of the Pylons special objects
+        # (StackedObjectProxies)
+        paste.registry.restorer.restoration_begin(request_id)
+
+
+
+        host, port = get_or_raise('server').split(':')
+        tubes = config.get('tubes')
+        tubes = tubes.split(' ') if tubes else ()
+        run_worker(host, port, tubes)
