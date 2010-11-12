@@ -1,3 +1,5 @@
 development.db
 photosync.egg-info
 data
+mydevenv
+*.pyc

@@ -7,8 +7,6 @@ import json
 from pylons import request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
-from gearman.client import GearmanClient
-
 from photosync.lib.base import BaseController, render
 from photosync import fb
 from photosync import flickr
