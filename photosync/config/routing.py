@@ -35,5 +35,6 @@ def make_map(config):
 
     map.connect('fb_auth_redirect', '/fb/auth_redirect', controller='fbauth', action='index')
     map.connect('flickr_auth_redirect', '/flickr/auth_redirect', controller='flickrauth', action='index')
+    map.connect('picasa_auth_redirect', '/picasa/auth_redirect', controller='picasaauth', action='index')
 
     return map

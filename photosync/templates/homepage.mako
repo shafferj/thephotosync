@@ -38,7 +38,11 @@
         Picassa:
       </td>
       <td>
-        Not implemented yet :(
+        % if c.picasa_user:
+        <strong>Connected!</strong>
+        % else:
+        <a href="${c.picasa_connect_url}">Connect</a>
+        % endif
       </td>
     </tr>
   </table>
