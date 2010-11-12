@@ -141,12 +141,7 @@ class Graph(object):
         c.setopt(c.VERBOSE, 1)
         response = StringIO.StringIO()
         c.setopt(c.WRITEFUNCTION, response.write)
-        while True:
-            try:
-                c.perform()
-                break
-            except Exception, e:
-                import pdb; pdb.set_trace()
+        c.perform()
         c.close()
         result = json.loads(response.getvalue())
         return result

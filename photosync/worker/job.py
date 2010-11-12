@@ -83,11 +83,12 @@ class Job(object):
         id = connection.put(data, **put_kwargs)
         return id
 
-    def resubmit(self):
+    def resubmit(self, delay=0):
         return Job.submit_advanced(
             self.handler,
             self.__data['args'],
-            self.__data['kwargs'])
+            self.__data['kwargs'],
+            delay=delay)
 
     def delete(self):
         return self.__job.delete()
@@ -121,5 +122,8 @@ class Job(object):
             log.exception("Uncaught exception while running job %s", self.queue_id)
             self.__job.bury()
         else:
-            self.__job.delete()
+            try:
+                self.__job.delete()
+            except Exception, e:
+                log.warn("Failed to delete job?? whatevs... %r", e)
             return result

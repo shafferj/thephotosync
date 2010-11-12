@@ -1,15 +1,40 @@
 <%inherit file="/base.mako"/>\
 <%namespace file="/widgets/task.mako" name="t"/>
 <%namespace file="/widgets/box.mako" name="box"/>
+<%namespace file="/widgets/progressbar.mako" name="p"/>
 
-
-% if c.tasks:
+%if c.tasks:
 <%box:box title="Status">
-  % for task in c.tasks:
-      ${t.task(task)}
-  % endfor
+%if c.current_task:
+  %if c.current_task.percentComplete is None:
+    ${p.progress_bar(0, "Starting...")}
+  %else:
+    ${p.progress_bar(c.current_task.percentComplete, c.current_task.status_data)}
+  %endif
+%else:
+  %if c.next_task:
+    <div>
+      next sync in
+      <strong>
+        ${h.distance_of_time_in_words(c.next_task.time_left, granularity='minute')}
+      </strong>
+      <a href="/sync/full_sync">sync now</a>
+    </div>
+  %endif
+  %if c.last_task:
+    <div>
+    last sync completed
+    %if c.last_task.end_time:
+      ${h.time_ago_in_words(c.last_task.end_time, granularity='minute')}
+      ago
+    %else:
+      ${c.last_task.queue_id}
+    %endif
+    </div>
+  %endif
+%endif
 </%box:box>
-% endif
+%endif
 
 <%box:box title="Connected Accounts">
   <table>
@@ -26,11 +51,11 @@
         Flickr Account:
       </td>
       <td>
-        % if c.flickr_user:
+        %if c.flickr_user:
         <strong>${c.flickr_user.username}</strong>
-        % else:
+        %else:
         <a href="${c.flickr_connect_url}">Connect</a>
-        % endif
+        %endif
       </td>
     </tr>
     <tr>
@@ -38,11 +63,11 @@
         Picassa:
       </td>
       <td>
-        % if c.picasa_user:
+        %if c.picasa_user:
         <strong>Connected!</strong>
-        % else:
+        %else:
         <a href="${c.picasa_connect_url}">Connect</a>
-        % endif
+        %endif
       </td>
     </tr>
   </table>

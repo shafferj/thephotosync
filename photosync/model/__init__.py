@@ -56,7 +56,7 @@ class AsyncTask(Base):
     __tablename__ = 'async_task'
 
     id = Column('id', Integer, primary_key=True)
-    queue_id = Column('queue_id', String(100), index=True)
+    queue_id = Column('queue_id', Integer, index=True)
     type = Column('type', String(100), index=True)
     total_units = Column('total_units', Integer)
     completed_units = Column('completed_units', Integer)
@@ -94,7 +94,7 @@ class AsyncTask(Base):
 
     @property
     def is_completed(self):
-        return self.end_time is not None
+        return not self._job
 
     __job = "SENTINAL"
 
@@ -107,9 +107,14 @@ class AsyncTask(Base):
 
     @property
     def time_left(self):
-        return self._job and self._job.stats['time-left']
+        # 120 is magical TTR time in beanstalk. time left is
+        # set to TTR when the task is being processed.
+        if self._job and self._job.stats['time-left'] > 120:
+            return self._job.stats['time-left']
 
     def run_now(self):
+        self.queue_id = None
+        Session.commit()
         self.queue_id = self._job.resubmit()
         self.__job = "SENTINAL"
         Session.commit()

@@ -75,9 +75,13 @@ class TaskHandler(object):
 
     def __call__(self):
         try:
-            if self.task.queue_id != self.job.queue_id:
-                # this job is no longer supposed to exist...
-                return self.job.delete()
+            if self.task.queue_id:
+                if self.task.queue_id != self.job.queue_id:
+                    # this job is no longer supposed to exist...
+                    return self.job.delete()
+            else:
+                self.task.queue_id = self.job.queue_id
+                Session.commit()
             result = self.run(*self.__args, **self.__kwargs)
         except Exception, e:
             traceback.print_exc()
