@@ -112,7 +112,7 @@ class Graph(object):
             try:
                 result = json.loads(urllib2.urlopen(self.get_url(path)).read())
             except urllib2.HTTPError, e:
-                log.warn("Failed to load %s: %r", self.get_url(path), e)
+                log.warn("Failed to load %s: %s", self.get_url(path), e.read())
                 result = None
             else:
                 if self.cache:

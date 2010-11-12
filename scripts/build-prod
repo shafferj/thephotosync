@@ -1,0 +1,5 @@
+#!/bin/sh -e
+
+echo "Installing lots of packages"
+apt-get install python-dev git-core build-essential libmysqlclient-dev mysql-server python-pycurl libcurl3 beanstalkd
+

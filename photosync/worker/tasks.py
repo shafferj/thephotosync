@@ -89,7 +89,6 @@ class FullSync(TaskHandler):
 
 
     def run(self, user_id):
-        import pdb; pdb.set_trace()
         self.user = User.get_by_id(user_id)
         self.fk = flickr.FlickrAPI(self.user.flickr_token)
         self.fb_user = fb.GraphUser(access_token=self.user.fb_access_token)

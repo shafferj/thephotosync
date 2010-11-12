@@ -17,3 +17,12 @@ Tweak the config file as appropriate and then setup the application::
     paster setup-app config.ini
 
 Then you are ready to go.
+
+
+Setting up a production box
+===========================
+
+You need to install lots of stuff:
+
+  apt-get install python-dev git-core build-essential libmysqlclient-dev
+                  mysql-server python-pycurl libcurl3 beanstalkd
