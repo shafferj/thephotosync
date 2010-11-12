@@ -14,18 +14,6 @@ def task_ping(worker, job):
     log.info("ping %s", job.data)
     return "pong %s" % job.data
 
-#def task_long_ping(worker, job):
-#    task = Session.query(AsyncTask).filter_by(gearman_unique=job.unique).first()
-#    if not task:
-#        return
-#    N = int(job.data)
-#    for i in xrange(N):
-#        log.info("did %s sleeps" % i)
-#        task.set_status(i, N, "did %s sleeps" % i, worker, job)
-#        Session.commit()
-#        time.sleep(1)
-#    return "all done"
-
 def run_worker(host, port, tubes=()):
 
     log.info("Starting photosync worker")

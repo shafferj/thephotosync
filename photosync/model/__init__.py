@@ -6,11 +6,10 @@ import uuid
 
 from pylons import session
 
-from gearman.client import GearmanClient
-
 from sqlalchemy import desc, orm, Column, String, Unicode,\
     UnicodeText, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relation, backref
+from photosync.lazy import lazy
 from photosync.model.meta import Session, Base
 from photosync.model.json import Json
 from photosync.model.settings import UserSetting
@@ -58,7 +57,6 @@ class AsyncTask(Base):
 
     id = Column('id', Integer, primary_key=True)
     queue_id = Column('gearman_unique', String(100), index=True)
-    gearman_data = Column('gearman_data', Json)
     total_units = Column('total_units', Integer)
     completed_units = Column('completed_units', Integer)
     start_time = Column('start_time', DateTime)
@@ -87,11 +85,14 @@ class AsyncTask(Base):
         if self.completed_units is not None and self.total_units:
             return 100.0*self.completed_units/self.total_units
 
+    @lazy
+    def _beanstalk_connection(self):
+        return 
+
     def __unicode__(self):
         return u"%s/%s %s: %r (%r)" % (
             self.completed_units, self.total_units,
-            self.status_code, self.status_data,
-            self.gearman_data)
+            self.status_code, self.status_data)
 
     __str__ = __unicode__
 
