@@ -57,7 +57,7 @@ class Job(object):
                    'kwargs':kwargs}
         data = json.dumps(payload)
 
-        host, port = handler_config.get('server', g.DEFAULT_BEANSTALK).split(':')
+        host, port = (handler_config.get('server') or g.DEFAULT_BEANSTALK).split(':')
         connection = beanstalkc.Connection(host=host, port=int(port))
         id = connection.put(data, **put_kwargs)
         connection.close()
@@ -78,8 +78,11 @@ class Job(object):
 
     def run(self):
         try:
-            return self.handler(self, *self.__data['args'], **self.__data['kwargs'])
+            result = self.handler(self, *self.__data['args'], **self.__data['kwargs'])
         except Exception, e:
             traceback.print_exc()
             log.exception("Uncaught exception while running job %s", self.queue_id)
             self.__job.bury()
+        else:
+            self.__job.delete()
+            return result

@@ -59,7 +59,7 @@ class TaskHandler(object):
 
     def __call__(self):
         try:
-            return self.run(*self.__args, **self.__kwargs)
+            result = self.run(*self.__args, **self.__kwargs)
         except Exception, e:
             traceback.print_exc()
             log.exception("Failed to run task %s", self.__class__.__name__)
@@ -84,11 +84,12 @@ class FlickrRequest(http.Request):
             return json.loads(raw[len('jsonFlickrApi('):-1])
         return raw
 
-
+@register
 class FullSync(TaskHandler):
 
 
     def run(self, user_id):
+        import pdb; pdb.set_trace()
         self.user = User.get_by_id(user_id)
         self.fk = flickr.FlickrAPI(self.user.flickr_token)
         self.fb_user = fb.GraphUser(access_token=self.user.fb_access_token)
@@ -198,3 +199,5 @@ class FullSync(TaskHandler):
             status = "Synced %s from %s to Facebook" % (photo.get('title'),
                                                         photoset.find('title').text)
             self.set_status(self.synced_photos, self.total_photos, status)
+
+

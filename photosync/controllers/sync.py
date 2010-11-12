@@ -24,10 +24,7 @@ class SyncController(BaseController):
         redirect(url('index'))
 
     def full_sync(self):
-        AsyncTask().submit_job(
-            'full_sync',
-            {'user_id':session.get('user_id')},
-            background=True)
+	tasks.FullSync.submit(session.get('user_id'))
         redirect(url('index'))
 
     def index(self):
