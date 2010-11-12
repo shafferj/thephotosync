@@ -47,7 +47,7 @@
     </tr>
   </table>
   <%def name="buttons()">
-    <a class="button" href="/sync/long_ping?seconds=30">Ping</a>
+    <a class="button" href="/sync/long_ping?seconds=5">Ping</a>
     <a class="button" href="/sync/full_sync">Sync</a>
   </%def>
 </%box:box>

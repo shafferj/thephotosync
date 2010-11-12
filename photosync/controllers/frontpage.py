@@ -27,14 +27,14 @@ class FrontpageController(BaseController):
                 'offline_access',
                 ])
         c.fbuser = fb.GraphUser()
-	c.picasa_user = None
-	if session.get('picasa_token'):
-	    c.picasa_user = gdata.photos.service.PhotosService() 
+        c.picasa_user = None
+        if session.get('picasa_token'):
+            c.picasa_user = gdata.photos.service.PhotosService()
         c.flickr_user = None
         if session.get('flickr_token'):
             c.flickr_user = flickr.FlickrUser()
 
-        c.tasks = AsyncTask.get_for_user()
+        c.tasks = AsyncTask.get_for_user(limit=100)
 
         return render('/homepage.mako')
 

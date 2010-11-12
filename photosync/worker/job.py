@@ -7,10 +7,12 @@ import beanstalkc
 
 from pylons import app_globals as g
 
+from photosync.lazy import lazy
+
 log = logging.getLogger(__name__)
 _handlers = {}
 
-def _get_handler_name(handler):
+def get_handler_name(handler):
     return '%s:%s' % (handler.__module__, handler.__name__)
 
 def register(tube='default', server=None):
@@ -32,6 +34,15 @@ def register(tube='default', server=None):
     return decorator
 
 
+_connection = None
+def _get_connection():
+    global _connection
+    if not _connection:
+        host, port = g.DEFAULT_BEANSTALK.split(':')
+        _connection = beanstalkc.Connection(host=host, port=int(port))
+    return _connection
+
+
 class Job(object):
 
     def __init__(self, beanstalk_job=None):
@@ -39,14 +50,22 @@ class Job(object):
         self.__data = json.loads(self.__job.body)
 
     @staticmethod
+    def from_id(id):
+        if id is None:
+            return None
+        connection = _get_connection()
+        beanstalk_job = connection.peek(int(id))
+        job = Job(beanstalk_job) if beanstalk_job else None
+        return job
+
+    @staticmethod
     def register_handler(handler, tube='default', server=None):
-        _handlers[_get_handler_name(handler)] = {'handler':handler,
-                                                 'tube':tube,
-                                                 'server':server}
+        _handlers[get_handler_name(handler)] = {'handler':handler,
+                                                 'tube':tube}
 
     @staticmethod
     def submit_advanced(handler, args, kwargs, **put_kwargs):
-        name = _get_handler_name(handler)
+        name = get_handler_name(handler)
         if name not in _handlers:
             raise KeyError("The handler %s has not been registered" % name)
 
@@ -57,11 +76,29 @@ class Job(object):
                    'kwargs':kwargs}
         data = json.dumps(payload)
 
-        host, port = (handler_config.get('server') or g.DEFAULT_BEANSTALK).split(':')
-        connection = beanstalkc.Connection(host=host, port=int(port))
+        host, port = g.DEFAULT_BEANSTALK.split(':')
+        connection = _get_connection()
+        if 'tube' in handler_config:
+            connection.use(handler_config['tube'])
         id = connection.put(data, **put_kwargs)
-        connection.close()
         return id
+
+    def resubmit(self):
+        return Job.submit_advanced(
+            self.handler,
+            self.__data['args'],
+            self.__data['kwargs'])
+
+    def delete(self):
+        return self.__job.delete()
+
+    @lazy
+    def stats(self):
+        return self.__job.stats()
+
+    @property
+    def time_left(self):
+        return self.stats['time-left']
 
     @staticmethod
     def submit(handler, *args, **kwargs):

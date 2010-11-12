@@ -56,19 +56,26 @@ class AsyncTask(Base):
     __tablename__ = 'async_task'
 
     id = Column('id', Integer, primary_key=True)
-    queue_id = Column('gearman_unique', String(100), index=True)
+    queue_id = Column('queue_id', String(100), index=True)
+    type = Column('type', String(100), index=True)
     total_units = Column('total_units', Integer)
     completed_units = Column('completed_units', Integer)
+    created_time = Column('created_time', DateTime)
     start_time = Column('start_time', DateTime)
     end_time = Column('end_time', DateTime)
     last_update_time = Column('last_update_time', DateTime)
-    status_code = Column('status_code', Integer)
+    status_code = Column('status_code', Integer, index=True)
     status_data = Column('status_data', Json)
     user_id = Column('user_id', Integer, ForeignKey('users.id'))
     user = relation('User', backref=backref('async_tasks', order_by=last_update_time))
 
-    def __init__(self):
-        self.user_id = session.get('user_id')
+    def __init__(self, user_id=None, type=None):
+        user_id = user_id or session.get('user_id')
+        if not user_id:
+            raise ValueError("Cannot create async task without a user id")
+        self.user_id = user_id
+        self.type = type
+        self.created_time = datetime.datetime.now()
 
     def set_status(self, completed, total, data, worker=None, job=None):
         self.completed_units = completed
@@ -85,9 +92,27 @@ class AsyncTask(Base):
         if self.completed_units is not None and self.total_units:
             return 100.0*self.completed_units/self.total_units
 
-    @lazy
-    def _beanstalk_connection(self):
-        return 
+    @property
+    def is_completed(self):
+        return self.end_time is not None
+
+    __job = "SENTINAL"
+
+    @property
+    def _job(self):
+        from photosync.worker.job import Job
+        if self.__job == "SENTINAL":
+            self.__job = Job.from_id(self.queue_id)
+        return self.__job
+
+    @property
+    def time_left(self):
+        return self._job and self._job.stats['time-left']
+
+    def run_now(self):
+        self.queue_id = self._job.resubmit()
+        self.__job = "SENTINAL"
+        Session.commit()
 
     def __unicode__(self):
         return u"%s/%s %s: %r (%r)" % (
@@ -98,13 +123,20 @@ class AsyncTask(Base):
 
 
     @staticmethod
-    def get_for_user(user_id=None, limit=3):
+    def get_for_user(user_id=None, limit=3, type=None):
         if not user_id:
             user_id = session.get('user_id')
-        return Session.query(AsyncTask)\
-            .filter(AsyncTask.user_id==user_id)\
-            .order_by(desc('last_update_time'))\
+
+        query = Session.query(AsyncTask)\
+            .filter(AsyncTask.user_id==user_id)
+
+        if type:
+            query = query.filter(AsyncTask.type==type)
+
+        query = query.order_by(desc('created_time'))\
             .limit(limit)
+
+        return query
 
 
 class SyncRecord(Base):

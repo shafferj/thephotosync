@@ -13,7 +13,7 @@ from photosync import fb
 from photosync import flickr
 from photosync import http
 
-from photosync.worker.job import Job, register
+from photosync.worker.job import Job, register, get_handler_name
 
 log = logging.getLogger(__name__)
 
@@ -47,23 +47,44 @@ class TaskHandler(object):
     def run(self):
         return
 
+    def resubmit(self, delay=60):
+        return self.__class__.submit_advanced(
+            self.__args,
+            self.__kwargs,
+            delay=delay,
+            user_id=self.task.user_id)
+
     @classmethod
-    def submit(cls, *args, **kwargs):
-        task = AsyncTask()
+    def get_type(cls):
+        return get_handler_name(cls)
+
+    @classmethod
+    def submit_advanced(cls, args, kwargs, delay=0, user_id=None):
+        task = AsyncTask(user_id=user_id)
+        task.type = cls.get_type()
         Session.add(task)
         Session.commit()
-        queue_id = Job.submit(cls, task.id, args, kwargs)
+        queue_id = Job.submit_advanced(cls, (task.id, args, kwargs), {}, delay=delay)
         task.queue_id = queue_id
         Session.commit()
         return task
 
+    @classmethod
+    def submit(cls, *args, **kwargs):
+        return cls.submit_advanced(args, kwargs)
+
     def __call__(self):
         try:
+            if self.task.queue_id != self.job.queue_id:
+                # this job is no longer supposed to exist...
+                return self.job.delete()
             result = self.run(*self.__args, **self.__kwargs)
         except Exception, e:
             traceback.print_exc()
             log.exception("Failed to run task %s", self.__class__.__name__)
             raise
+        else:
+            return result
 
 @register
 class LongPing(TaskHandler):
@@ -106,6 +127,8 @@ class FullSync(TaskHandler):
         for photoset in photosets:
             self.sync_photoset(photoset)
 
+        # once we are all done, let's submit the task to rerun in an hour.
+        self.resubmit(delay=60*60)
 
     def sync_photoset(self, photoset):
         log.info("Syncing flickr photoset %s to facebook", photoset.get('id'))
@@ -198,5 +221,3 @@ class FullSync(TaskHandler):
             status = "Synced %s from %s to Facebook" % (photo.get('title'),
                                                         photoset.find('title').text)
             self.set_status(self.synced_photos, self.total_photos, status)
-
-

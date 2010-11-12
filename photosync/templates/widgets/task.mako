@@ -1,6 +1,8 @@
 <%namespace file="/widgets/progressbar.mako" import="*"/>
 <%def name="task(task)">
 
+${task.type} ${task.time_left}
+
 % if task.end_time:
 <div>
   Completed on ${task.end_time.strftime('%x')} at ${task.end_time.strftime('%X')}
