@@ -23,7 +23,7 @@ class User(Base):
     __tablename__ = 'users'
     id = Column('id', Integer, primary_key=True)
     fb_uid = Column('fb_uid', Integer, index=True)
-    flickr_nsid = Column('flickr_nsid', UnicodeText, index=True)
+    flickr_nsid = Column('flickr_nsid', String(100), index=True)
     flickr_token = Column('flickr_token', UnicodeText)
     fb_access_token = Column('fb_access_token', UnicodeText)
 

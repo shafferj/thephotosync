@@ -15,6 +15,7 @@ setup(
     install_requires=[
         "Pylons>=1.0",
         "SQLAlchemy>=0.5",
+        "MySQL-python",
         "flickrapi",
         "gdata",
         "pycurl",
