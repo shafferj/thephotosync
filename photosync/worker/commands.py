@@ -11,6 +11,7 @@ import paste.fixture
 import paste.registry
 from paste.script.command import Command, BadCommand
 from paste.script.serve import DaemonizeException
+from paste.script.serve import LazyWriter
 from paste.script.serve import live_pidfile, read_pidfile, _remove_pid_file
 from paste.deploy import loadapp
 from sqlalchemy import engine_from_config
@@ -80,6 +81,7 @@ class RunWorkerCommand(Command):
                       help=("Do not load logging configuration from the "
                             "config file"))
 
+    default_verbosity = 2
 
     possible_subcommands = ('start', 'stop', 'restart', 'status')
     def command(self):
@@ -139,6 +141,15 @@ class RunWorkerCommand(Command):
             if not self.options.log_file:
                 self.options.log_file = 'worker.log'
 
+        # Ensure the log file is writeable
+        if self.options.log_file:
+            try:
+                writeable_log_file = open(self.options.log_file, 'a')
+            except IOError, ioe:
+                msg = 'Error: Unable to write to log file: %s' % ioe
+                raise BadCommand(msg)
+            writeable_log_file.close()
+
         # Ensure the pid file is writeable
         if self.options.pid_file:
             try:
@@ -159,6 +170,12 @@ class RunWorkerCommand(Command):
 
         if self.options.pid_file:
             self.record_pid(self.options.pid_file)
+
+        if self.options.log_file:
+            stdout_log = LazyWriter(self.options.log_file, 'a')
+            sys.stdout = stdout_log
+            sys.stderr = stdout_log
+            logging.basicConfig(stream=stdout_log)
 
         if not self.options.quiet:
             # Configure logging from the config file
@@ -209,6 +226,7 @@ class RunWorkerCommand(Command):
         if self.verbose > 0:
             print 'Entering daemon mode'
         pid = os.fork()
+        print 'forked'
         if pid:
             # The forked process also has a handle on resources, so we
             # *don't* want proper termination of the process, we just
@@ -216,6 +234,7 @@ class RunWorkerCommand(Command):
             os._exit(0)
         # Make this the session leader
         os.setsid()
+        print 'more fork'
         # Fork again for good measure!
         pid = os.fork()
         if pid:
@@ -242,6 +261,7 @@ class RunWorkerCommand(Command):
         # Duplicate standard input to standard output and standard error.
         os.dup2(0, 1)  # standard output (1)
         os.dup2(0, 2)  # standard error (2)
+        print 'done'
 
     def record_pid(self, pid_file):
         pid = os.getpid()

@@ -6,3 +6,5 @@ mydevenv
 *~
 paster.log
 paster.pid
+worker.log
+worker.pid
