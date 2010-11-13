@@ -2,17 +2,15 @@
 from __future__ import absolute_import
 
 import datetime
-import uuid
 
 from pylons import session
 
-from sqlalchemy import desc, orm, Column, String, Unicode,\
-    UnicodeText, Integer, ForeignKey, DateTime
+from sqlalchemy import (desc, Column, String, UnicodeText, Integer,
+                        ForeignKey, DateTime)
+from sqlalchemy.dialects.mysql.base import BIGINT
 from sqlalchemy.orm import relation, backref
-from photosync.lazy import lazy
 from photosync.model.meta import Session, Base
 from photosync.model.json import Json
-from photosync.model.settings import UserSetting
 
 def init_model(engine):
     """Call me before using any of the tables or classes in the model"""
@@ -155,7 +153,7 @@ class SyncRecord(Base):
     STATUS_RUNNING = 2
 
     id = Column('id', Integer, primary_key=True)
-    fbid = Column('fbid', String(100), index=True)
+    fbid = Column('fbid', BIGINT, index=True)
     flickrid = Column('flickrid', String(100), index=True)
     timestamp = Column('timestamp', DateTime)
     user_id = Column('user_id', Integer, ForeignKey('users.id'))
@@ -180,15 +178,3 @@ class SyncRecord(Base):
     @property
     def running(self):
         return self.status == SyncRecord.STATUS_RUNNING
-
-
-class Album(Base):
-    __tablename__ = 'albums'
-    id = Column('id', Integer, primary_key=True)
-    owner = Column('owner', Integer)
-    fbid = Column('fnid', Integer)
-    fbdata = Column('fbdata', Json)
-
-    def __repr__(self):
-        return "<Album id=%s owner=%s fbid=%s>" % (
-            self.id, self.owner, self.fbid)
