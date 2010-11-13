@@ -202,16 +202,19 @@ class FullSync(TaskHandler):
         for photo, request in requests:
             sync = SyncRecord(SyncRecord.TYPE_PHOTO)
             sync.flickrid = photo.get("id")
+            Session.add(sync)
+            Session.commit()
             res = request.read_response()
             img_url = res['sizes']['size'][-1]['source']
             f, temp_filename = tempfile.mkstemp()
             log.info("Downloading image %s", img_url)
             img_request = http.Request(img_url, filename=temp_filename)
-            img_requests.append((photo, temp_filename, sync, img_request))
+            img_requests.append((photo, temp_filename, sync.id, img_request))
             fetcher.queue(img_request)
         fetcher.run()
 
-        for photo, temp_filename, sync, img_request in img_requests:
+        for photo, temp_filename, sync_id, img_request in img_requests:
+            sync = Session.query(SyncRecord).filter_by(id=sync_id).first()
             graph_photo = album.photos.add(temp_filename, photo.get('title'))
             os.remove(temp_filename)
             if graph_photo:
@@ -219,7 +222,6 @@ class FullSync(TaskHandler):
                 sync.status = SyncRecord.STATUS_SUCCESS
             else:
                 sync.status = SyncRecord.STATUS_FAILED
-            Session.add(sync)
             Session.commit()
             self.synced_photos += 1
             status = "Synced %s from %s to Facebook" % (photo.get('title'),

@@ -155,8 +155,8 @@ class SyncRecord(Base):
     STATUS_RUNNING = 2
 
     id = Column('id', Integer, primary_key=True)
-    fbid = Column('fbid', Integer, index=True)
-    flickrid = Column('flickrid', Integer, index=True)
+    fbid = Column('fbid', String(100), index=True)
+    flickrid = Column('flickrid', String(100), index=True)
     timestamp = Column('timestamp', DateTime)
     user_id = Column('user_id', Integer, ForeignKey('users.id'))
     status = Column('status', Integer)

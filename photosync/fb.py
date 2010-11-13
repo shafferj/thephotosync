@@ -28,7 +28,7 @@ def get_graph_url(path, args):
                     ])
 
 def get_auth_redirect_url():
-    return g.BASE_URL + url('fb_auth_redirect')
+    return g.BASE_URL + u'/fb/auth_redirect'
 
 def get_authorization_url(scope=[]):
     return get_graph_url('/oauth/authorize',
