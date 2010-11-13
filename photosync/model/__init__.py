@@ -75,7 +75,7 @@ class AsyncTask(Base):
         self.type = type
         self.created_time = datetime.datetime.now()
 
-    def set_status(self, completed, total, data, worker=None, job=None):
+    def set_status(self, completed, total, data):
         self.completed_units = completed
         self.total_units = total
         self.status_data = data
@@ -98,9 +98,9 @@ class AsyncTask(Base):
 
     @property
     def _job(self):
-        from photosync.worker.job import Job
+        from photosync.worker import job
         if self.__job == "SENTINAL":
-            self.__job = Job.from_id(self.queue_id)
+            self.__job = job.from_id(self.queue_id)
         return self.__job
 
     @property
@@ -161,9 +161,12 @@ class SyncRecord(Base):
     type = Column('type', Integer, index=True)
     user = relation('User', backref=backref('sync_records', order_by=timestamp))
 
-    def __init__(self, type):
+    def __init__(self, type, user_id=None):
+        user_id = user_id or session.get('user_id')
+        if not user_id:
+            raise ValueError("Must provide a user_id")
         self.type = type
-        self.user_id = session.get('user_id')
+        self.user_id = user_id
         self.timestamp = datetime.datetime.now()
         self.status = SyncRecord.STATUS_RUNNING
 

@@ -66,10 +66,11 @@ class JsonRequest(Request):
 
 
 class Fetcher(object):
-    def __init__(self, maxconns=5):
+    def __init__(self, maxconns=5, progress_callback=None):
         self._queue = []
         self._curler = pycurl.CurlMulti()
         self._curler.handles = []
+        self.progress_callback = progress_callback
 
         for i in xrange(maxconns):
             c = pycurl.Curl()
@@ -139,7 +140,8 @@ class Fetcher(object):
                     processed += 1
                     self._curler.remove_handle(c)
                     freelist.append(c)
-
+                if self.progress_callback:
+                    self.progress_callback(processed, total)
                 if num_q == 0:
                     break
 

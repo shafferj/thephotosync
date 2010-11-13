@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import os
+import os.path
 import json
 import time
 import traceback
@@ -14,6 +15,7 @@ from photosync import flickr
 from photosync import http
 
 from photosync.worker.job import Job, register, get_handler_name
+from photosync.worker import job
 
 log = logging.getLogger(__name__)
 
@@ -39,9 +41,10 @@ class TaskHandler(object):
 
     def set_status(self, completed, total, data):
         log.info("%s %s Completed %s/%s: %r",
-                 self.__class__.__name__, self.job.queue_id,
+                 self.__class__.__name__, self.job.jid,
                  completed, total, data)
-        self.task.set_status(completed, total, data, job=self.job)
+        self.job.touch()
+        self.task.set_status(completed, total, data)
         Session.commit()
 
     def run(self):
@@ -64,7 +67,7 @@ class TaskHandler(object):
         task.type = cls.get_type()
         Session.add(task)
         Session.commit()
-        queue_id = Job.submit_advanced(cls, (task.id, args, kwargs), {}, delay=delay)
+        queue_id = job.submit_advanced(cls, (task.id, args, kwargs), {}, delay=delay)
         task.queue_id = queue_id
         Session.commit()
         return task
@@ -76,11 +79,11 @@ class TaskHandler(object):
     def __call__(self):
         try:
             if self.task.queue_id:
-                if self.task.queue_id != self.job.queue_id:
+                if self.task.queue_id != self.job.jid:
                     # this job is no longer supposed to exist...
                     return self.job.delete()
             else:
-                self.task.queue_id = self.job.queue_id
+                self.task.queue_id = self.job.jid
                 Session.commit()
             result = self.run(*self.__args, **self.__kwargs)
         except Exception, e:
@@ -134,6 +137,9 @@ class FullSync(TaskHandler):
         # once we are all done, let's submit the task to rerun in an hour.
         self.resubmit(delay=60*60)
 
+    def on_fetcher_progress(self, processed, total):
+        self.job.touch()
+
     def sync_photoset(self, photoset):
         log.info("Syncing flickr photoset %s to facebook", photoset.get('id'))
         sync = Session.query(SyncRecord).filter_by(
@@ -146,7 +152,7 @@ class FullSync(TaskHandler):
             if not album.data:
                 album = None
         if not album:
-            sync = SyncRecord(SyncRecord.TYPE_ALBUM)
+            sync = SyncRecord(SyncRecord.TYPE_ALBUM, self.task.user_id)
             sync.flickrid = photoset.get('id')
 
             album = self.fb_user.albums.add(
@@ -170,7 +176,7 @@ class FullSync(TaskHandler):
             sync = Session.query(SyncRecord).filter_by(
                 flickrid=photo.get('id'), type=SyncRecord.TYPE_PHOTO).first()
             fb_photo = None
-            if sync and (sync.running or sync.success):
+            if sync and sync.fbid and (sync.running or sync.success):
                 log.info("Skipping... already synced")
                 fb_photo = fb.GraphPhoto(id=sync.fbid, access_token=self.user.fb_access_token)
                 if not fb_photo.data:
@@ -185,7 +191,14 @@ class FullSync(TaskHandler):
                                                        photoset.find('title').text)
         self.set_status(self.synced_photos, self.total_photos, status)
 
-        fetcher = http.Fetcher()
+        def on_progress(processed, total):
+            self.set_status(
+                processed,
+                total,
+                "Found %s/%s photos in %s..." % (
+                    processed, total, photoset.find('title').text))
+
+        fetcher = http.Fetcher(progress_callback=on_progress)
         requests = []
         for photo in photos_to_sync:
             url = flickr.get_url(
@@ -197,24 +210,39 @@ class FullSync(TaskHandler):
             fetcher.queue(request)
         fetcher.run()
 
-        fetcher = http.Fetcher()
+        def on_progress(processed, total):
+            self.set_status(
+                processed,
+                total,
+                "Downloaded %s/%s images from %s" % (
+                    processed, total, photoset.find('title').text))
+
+        fetcher = http.Fetcher(progress_callback=on_progress)
         img_requests = []
+
+        if not os.path.exists('/tmp/photosync'):
+            os.mkdir('/tmp/photosync')
+
         for photo, request in requests:
-            sync = SyncRecord(SyncRecord.TYPE_PHOTO)
+            sync = SyncRecord(SyncRecord.TYPE_PHOTO, self.task.user_id)
             sync.flickrid = photo.get("id")
             Session.add(sync)
-            Session.commit()
             res = request.read_response()
-            img_url = res['sizes']['size'][-1]['source']
-            f, temp_filename = tempfile.mkstemp()
+            try:
+                img_url = res['sizes']['size'][-1]['source']
+            except:
+                import pdb; pdb.set_trace()
             log.info("Downloading image %s", img_url)
-            img_request = http.Request(img_url, filename=temp_filename)
-            img_requests.append((photo, temp_filename, sync.id, img_request))
-            fetcher.queue(img_request)
+            filename = '/tmp/photosync/flickr-'+sync.flickrid
+            img_request = None
+            if not os.path.exists(filename):
+                img_request = http.Request(img_url, filename=filename)
+                fetcher.queue(img_request)
+            img_requests.append((photo, filename, sync, img_request))
+        Session.commit()
         fetcher.run()
 
-        for photo, temp_filename, sync_id, img_request in img_requests:
-            sync = Session.query(SyncRecord).filter_by(id=sync_id).first()
+        for photo, temp_filename, sync, img_request in img_requests:
             graph_photo = album.photos.add(temp_filename, photo.get('title'))
             os.remove(temp_filename)
             if graph_photo:
