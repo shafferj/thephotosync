@@ -181,3 +181,19 @@ class SyncRecord(Base):
     @property
     def running(self):
         return self.status == SyncRecord.STATUS_RUNNING
+
+    @staticmethod
+    def get_for_user(user_id=None, limit=3, type=None):
+        if not user_id:
+            user_id = session.get('user_id')
+
+        query = Session.query(SyncRecord)\
+            .filter(AsyncTask.user_id==user_id)
+
+        if type:
+            query = query.filter(SyncRecord.type==type)
+
+        query = query.order_by(desc('timestamp'))\
+            .limit(limit)
+
+        return query

@@ -226,7 +226,7 @@ class RunWorkerCommand(Command):
         if self.verbose > 0:
             print 'Entering daemon mode'
         pid = os.fork()
-        print 'forked'
+
         if pid:
             # The forked process also has a handle on resources, so we
             # *don't* want proper termination of the process, we just
@@ -234,7 +234,7 @@ class RunWorkerCommand(Command):
             os._exit(0)
         # Make this the session leader
         os.setsid()
-        print 'more fork'
+
         # Fork again for good measure!
         pid = os.fork()
         if pid:
@@ -261,7 +261,7 @@ class RunWorkerCommand(Command):
         # Duplicate standard input to standard output and standard error.
         os.dup2(0, 1)  # standard output (1)
         os.dup2(0, 2)  # standard error (2)
-        print 'done'
+
 
     def record_pid(self, pid_file):
         pid = os.getpid()

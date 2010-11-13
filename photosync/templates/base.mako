@@ -7,20 +7,20 @@
           href="http://yui.yahooapis.com/combo?2.6.0/build/reset-fonts/reset-fonts.css" />
     <link rel="stylesheet" type="text/css" href="/style.css" />
     <script type="text/javascript"
-            src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+            src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
   </head>
 
   <body>
     <div id="header">
       <div class="container">
+        <h1><a href="/">PhotoSync</a></h1>
         % if session.get('user_id'):
         <div id="header-links">
           <a href="/logout">logout</a>
           &middot;
-          <a href="/settings">settings</a>
+          <a id="settings-link">settings</a>
         </div>
         % endif
-        <h1><a href="/">PhotoSync</a></h1>
       </div>
     </div>
     <div id="main" class="container">

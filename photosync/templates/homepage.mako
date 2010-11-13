@@ -3,13 +3,24 @@
 <%namespace file="/widgets/box.mako" name="box"/>
 <%namespace file="/widgets/progressbar.mako" name="p"/>
 
+<script type="text/javascript">
+  $("#settings-link").click(
+    function() {
+      $("#settings").fadeToggle('fast');
+    });
+</script>
+
 %if c.tasks:
-<%box:box title="Status">
+
+<div id="status-box">
 %if c.current_task:
   %if c.current_task.percentComplete is None:
     ${p.progress_bar(0, "Starting...")}
   %else:
     ${p.progress_bar(c.current_task.percentComplete, c.current_task.status_data)}
+    <div class="stats">
+      ${c.current_task.completed_units}/${c.current_task.total_units}
+    </div>
   %endif
 %else:
   %if c.next_task:
@@ -33,10 +44,10 @@
     </div>
   %endif
 %endif
-</%box:box>
+</div>
 %endif
 
-<%box:box title="Connected Accounts">
+<div id="settings" style="${'display:none;' if c.tasks else ''}">
   <table>
     <tr>
       <td>
@@ -58,7 +69,7 @@
         %endif
       </td>
     </tr>
-    <tr>
+    <!--tr>
       <td>
         Picassa:
       </td>
@@ -69,10 +80,13 @@
         <a href="${c.picasa_connect_url}">Connect</a>
         %endif
       </td>
-    </tr>
+    </tr-->
+    <tr>
+      <td></td>
+      <td class="buttons">
+        <a class="button" onclick="$('#settings').fadeToggle();">Ok</a>
+      </td>
+      </tr>
   </table>
-  <%def name="buttons()">
-    <a class="button" href="/sync/long_ping?seconds=5">Ping</a>
-    <a class="button" href="/sync/full_sync">Sync</a>
-  </%def>
-</%box:box>
+  <!--a class="button" href="/sync/full_sync">Sync</a-->
+</div>
