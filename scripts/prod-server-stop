@@ -1,4 +1,4 @@
 #!/bin/sh -e
 
-echo "Starting production web server"
-paster serve --stop-deamon production.ini
+echo "Stopping production web server"
+paster serve --stop-daemon production.ini

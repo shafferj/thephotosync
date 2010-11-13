@@ -1,4 +1,3 @@
 #!/bin/sh -e
 
-echo "Starting production web server"
 paster serve --status production.ini
