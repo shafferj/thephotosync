@@ -140,7 +140,7 @@ class Fetcher(object):
                     processed += 1
                     self._curler.remove_handle(c)
                     freelist.append(c)
-                if self.progress_callback:
+                if (err_list or ok_list) and self.progress_callback:
                     self.progress_callback(processed, total)
                 if num_q == 0:
                     break
