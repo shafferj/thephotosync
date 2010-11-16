@@ -18,18 +18,15 @@ h1 {
 strong {
     font-weight: bold;
 }
-table {
-    cell-spacing: collapse;
-}
 
-td {
-    padding: 10px;
-}
-
-a,
-a:visited {
-    color: blue;
+a {
     cursor: pointer;
+    color: #555;
+    font-weight: bold;
+    text-decoration: none;
+}
+a:hover {
+    color: #000;
 }
 
 #settings {
@@ -41,7 +38,11 @@ a:visited {
     min-height: 300px;
 }
 #settings table {
+    cell-spacing: collapse;
     margin: auto;
+}
+#settings table td {
+    padding: 10px;
 }
 
 #settings td.buttons {
@@ -101,7 +102,23 @@ div.container {
 }
 
 #status-box {
-    padding: 100px 50px;
+    padding: 50px 50px;
+}
+#status-box .profiles {
+    text-align: center;
+    margin-bottom: 30px;
+}
+#status-box .profiles .arrow {
+    font-size: 100px;
+    font-weight: bold;
+    color: #ccc;
+}
+#status-box table {
+    display: inline-block;
+    table-layout: fixed;
+}
+#status-box table td {
+    width: 150px;
 }
 
 #status-box .stats {
@@ -111,22 +128,75 @@ div.container {
     color: #555;
 }
 
-#login {
-    text-align: center;
-    padding: 130px;
+#frontpage {
+    margin-top: 50px;
 }
-#login-link {
-    font-size: large;
+#frontpage .step {
+    min-height: 150px;
+    text-align: center;
+}
+#frontpage .step h1 {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+#frontpage table {
+    display: inline;
+}
+#frontpage table td {
+    padding: 10px;
+}
+
+#frontpage .step a {
+    text-align: center;
+}
+
+#frontpage .completed h1{
+}
+
+#frontpage .disabled {
+    opacity: .4;
+}
+#frontpage .disabled a {
+    cursor: default;
+}
+#frontpage .disabled .big-button,
+#frontpage .disabled .big-button:hover {
     color: #c55;
+    background: #fff5f5;
+}
+
+.big-button {
+    display: inline-block;
+    font-size: large;
     text-decoration: none;
     font-weight: bold;
     border: 1px solid #fcc;
     padding: 10px;
+    color: #c55;
     background: #fff5f5;
 }
-#login-link:hover {
+.big-button:hover {
     color: #f00;
     background: #ffe5e5;
+}
+
+img.profile-pic {
+    border: 1px solid #ccc;
+    padding: 5px;
+}
+
+
+.error {
+    width: 400px;
+    border: 5px double red;
+    padding: 10px;
+    margin: 20px auto;
+    background: #ffd5d5;
+}
+
+.error a {
+    color: blue;
+    text-decoration: underline;
 }
 
 .box {

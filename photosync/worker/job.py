@@ -12,6 +12,9 @@ from photosync.lazy import lazy
 log = logging.getLogger(__name__)
 _handlers = {}
 
+STATE_BURIED = 'buried'
+
+
 def get_handler_name(handler):
     return '%s:%s' % (handler.__module__, handler.__name__)
 

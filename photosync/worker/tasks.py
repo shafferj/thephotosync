@@ -145,7 +145,7 @@ class FullSync(TaskHandler):
         sync = Session.query(SyncRecord).filter_by(
             flickrid=photoset.get('id'), type=SyncRecord.TYPE_ALBUM).first()
         album = None
-        if sync and (sync.running or sync.success):
+        if sync and sync.success:
             # don't resync unless we failed before
             log.info("skipping... already synced")
             album = fb.GraphAlbum(id=sync.fbid, access_token=self.user.fb_access_token)
@@ -173,14 +173,13 @@ class FullSync(TaskHandler):
         photos_to_sync = []
         for photo in photos:
             log.info("Syncing flickr photo %s to facebook", photo.get('id'))
-            sync = Session.query(SyncRecord).filter_by(
-                flickrid=photo.get('id'), type=SyncRecord.TYPE_PHOTO).first()
+            sync = SyncRecord.get_for_flickrid(photo.get('id')).first()
             fb_photo = None
-            if sync and sync.fbid and (sync.running or sync.success):
+            if sync and sync.fbid and sync.success:
                 log.info("Skipping... already synced")
                 fb_photo = fb.GraphPhoto(id=sync.fbid, access_token=self.user.fb_access_token)
-                if not fb_photo.data:
-                    fb_photo = None
+                #if not fb_photo.data:
+                #    fb_photo = None
                 self.synced_photos += 1
             if not fb_photo:
                 photos_to_sync.append(photo)
@@ -190,6 +189,9 @@ class FullSync(TaskHandler):
         status = "%s photos from %s already synced" % (already_synced,
                                                        photoset.find('title').text)
         self.set_status(self.synced_photos, self.total_photos, status)
+
+        if not photos_to_sync:
+            return
 
         def on_progress(processed, total):
             self.set_status(

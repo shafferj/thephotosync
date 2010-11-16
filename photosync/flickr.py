@@ -28,11 +28,24 @@ class FlickrUser(FlickrAPI):
 
     @lazy
     def _checkToken(self):
-        return self.auth_checkToken()
+        return self.auth_checkToken()[0]
 
-    username = lazy(lambda self: self._checkToken[0][2].get('username'))
-    nsid = lazy(lambda self: self._checkToken[0][2].get('nsid'))
+    @lazy
+    def _info(self):
+        return self.people_getInfo(user_id=self.nsid)[0]
 
+    username = lazy(lambda self: self._checkToken[2].get('username'))
+    name = property(lambda self: self._checkToken[2].get('fullname'))
+    nsid = lazy(lambda self: self._checkToken[2].get('nsid'))
+    link = property(lambda self: self._info.find('profileurl').text)
+
+    @lazy
+    def profile_pic_url(self):
+        iconserver = self._info.get('iconserver')
+        if iconserver != '0':
+            return 'http://farm%s.static.flickr.com/%s/buddyicons/%s.jpg' % (
+                self._info.get('iconfarm'), iconserver, self.nsid)
+        return 'http://www.flickr.com/images/buddyicon.jpg'
 
 def get_authorization_url(perms=''):
     return FlickrAPI().web_login_url(perms=perms)

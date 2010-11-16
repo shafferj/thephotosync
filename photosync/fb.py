@@ -14,7 +14,8 @@ from photosync.lazy import lazy
 log = logging.getLogger(__name__)
 
 
-def get_graph_url(path, args):
+def get_graph_url(path, args=None):
+    args = args or {}
     if 'access_token' in args or 'client_secret' in args:
         protocol = 'https://'
     else:
@@ -198,6 +199,9 @@ class GraphUser(GraphObject):
 
     first_name = property(lambda self: self.data['first_name'])
     last_name  = property(lambda self: self.data['last_name'])
+    name  = property(lambda self: self.data['name'])
+    link  = property(lambda self: self.data['link'])
+    profile_pic_url = property(lambda self: get_graph_url('/%s/picture' % self.id))
 
     albums     = lazy(lambda self: GraphAlbums(access_token=self.access_token))
 

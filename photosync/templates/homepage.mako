@@ -13,7 +13,44 @@
 %if c.tasks:
 
 <div id="status-box">
+  <div class="profiles">
+    <table>
+      <tr>
+        <td>
+          <img class="profile-pic" src="${c.flickr_user.profile_pic_url}" />
+          <br />
+          <a target="_new" href="${c.flickr_user.link}">${c.flickr_user.name}</a>
+        </td>
+        <td class="arrow">
+          ➞
+        </td>
+        <td>
+          <img class="profile-pic" src="${c.fb_user.profile_pic_url}" />
+          <br />
+          <a target="_new" href="${c.fb_user.link}">${c.fb_user.name}</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+
+
 %if c.current_task:
+
+  %if c.current_task.is_buried:
+    <div class="error">
+      I've been having a hard time syncing your photos and decided to give up
+      for the time being.  You might try
+      <a href="${c.sync_url}">kicking me</a>, but no guarantees I'll
+      start working again.
+    </div>
+  %else:
+
+    <script src="/homepage.js"></script>
+
+  %endif
+
+
   %if c.current_task.percentComplete is None:
     ${p.progress_bar(0, "Starting...")}
   %else:
@@ -22,6 +59,7 @@
       ${c.current_task.completed_units}/${c.current_task.total_units}
     </div>
   %endif
+
 %else:
   %if c.next_task:
     <div>
@@ -29,7 +67,7 @@
       <strong>
         ${h.distance_of_time_in_words(c.next_task.time_left, granularity='minute')}
       </strong>
-      <a href="/sync/full_sync">sync now</a>
+      <a href="${c.sync_url}">sync now</a>
     </div>
   %endif
   %if c.last_task:
@@ -54,9 +92,10 @@
         Facebook Account:
       </td>
       <td>
-        <strong>${c.fbuser.first_name} ${c.fbuser.last_name}</strong>
+        <strong>${c.fb_user.first_name} ${c.fb_user.last_name}</strong>
       </td>
     </tr>
+
     <tr>
       <td>
         Flickr Account:
@@ -69,18 +108,7 @@
         %endif
       </td>
     </tr>
-    <!--tr>
-      <td>
-        Picassa:
-      </td>
-      <td>
-        %if c.picasa_user:
-        <strong>Connected!</strong>
-        %else:
-        <a href="${c.picasa_connect_url}">Connect</a>
-        %endif
-      </td>
-    </tr-->
+
     <tr>
       <td></td>
       <td class="buttons">
@@ -88,5 +116,4 @@
       </td>
       </tr>
   </table>
-  <!--a class="button" href="/sync/full_sync">Sync</a-->
 </div>

@@ -11,6 +11,8 @@ from sqlalchemy.dialects.mysql.base import BIGINT
 from sqlalchemy.orm import relation, backref
 from photosync.model.meta import Session, Base
 from photosync.model.json import Json
+from photosync.worker import job
+
 
 def init_model(engine):
     """Call me before using any of the tables or classes in the model"""
@@ -94,11 +96,14 @@ class AsyncTask(Base):
     def is_completed(self):
         return not self._job
 
+    @property
+    def is_buried(self):
+        return self._job and self._job.stats['state'] == job.STATE_BURIED
+
     __job = "SENTINAL"
 
     @property
     def _job(self):
-        from photosync.worker import job
         if self.__job == "SENTINAL":
             self.__job = job.from_id(self.queue_id)
         return self.__job
@@ -150,7 +155,6 @@ class SyncRecord(Base):
 
     STATUS_SUCCESS = 0
     STATUS_FAILED = 1
-    STATUS_RUNNING = 2
 
     id = Column('id', Integer, primary_key=True)
     fbid = Column('fbid', BIGINT, index=True)
@@ -168,7 +172,6 @@ class SyncRecord(Base):
         self.type = type
         self.user_id = user_id
         self.timestamp = datetime.datetime.now()
-        self.status = SyncRecord.STATUS_RUNNING
 
     @property
     def success(self):
@@ -178,17 +181,10 @@ class SyncRecord(Base):
     def failed(self):
         return self.status == SyncRecord.STATUS_FAILED
 
-    @property
-    def running(self):
-        return self.status == SyncRecord.STATUS_RUNNING
-
     @staticmethod
-    def get_for_user(user_id=None, limit=3, type=None):
-        if not user_id:
-            user_id = session.get('user_id')
-
+    def get_for_flickrid(flickrid=None, limit=3, type=None):
         query = Session.query(SyncRecord)\
-            .filter(AsyncTask.user_id==user_id)
+            .filter(SyncRecord.flickrid==flickrid)
 
         if type:
             query = query.filter(SyncRecord.type==type)

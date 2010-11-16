@@ -25,10 +25,22 @@ class SyncController(BaseController):
 
     def full_sync(self):
         last = AsyncTask.get_for_user(type=tasks.FullSync.get_type(),
-                                      limit=1).all()
+                                      limit=1).first()
 
-        if not last or last[0].is_completed:
+        if not last or last.is_completed:
             tasks.FullSync.submit(session.get('user_id'))
         else:
-            last[0].run_now()
+            last.run_now()
         redirect(url('index'))
+
+    def status(self):
+        last = AsyncTask.get_for_user(type=tasks.FullSync.get_type(),
+                                      limit=1).first()
+
+        data = None
+        if last:
+            data = dict((attr, getattr(last, attr))
+                        for attr in
+                        ('total_units','completed_units','status_data'))
+
+        return json.dumps(data)
