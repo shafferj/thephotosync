@@ -5,14 +5,14 @@
 #
 [DEFAULT]
 debug = true
-email_to = you@yourdomain.com
-smtp_server = localhost
-error_email_from = paste@localhost
+email_to = ${email_to}
+smtp_server = ${smtp_server}
+error_email_from = ${error_email_from}
 
 [server:main]
 use = egg:Paste#http
 host = 0.0.0.0
-port = 5000
+port = ${port}
 
 [app:main]
 use = egg:photosync
@@ -24,6 +24,17 @@ beaker.session.key = photosync
 beaker.session.secret = ${app_instance_secret}
 app_instance_uuid = ${app_instance_uuid}
 
+photosync.FB_APP_ID = ${fb_app_id}
+photosync.FB_API_KEY = ${fb_api_key}
+photosync.FB_APP_SECRET = ${fb_app_secret}
+photosync.BASE_URL = ${base_url}
+photosync.FLICKR_API_KEY = ${flickr_api_key}
+photosync.FLICKR_API_SECRET = ${flickr_api_secret}
+photosync.DEFAULT_BEANSTALK = localhost:11300
+photosync.FB_GRAPH_ENDPOINT = graph.facebook.com
+
+
+
 # If you'd like to fine-tune the individual locations of the cache data dirs
 # for the Cache data, or the Session saves, un-comment the desired settings
 # here:
@@ -31,17 +42,22 @@ app_instance_uuid = ${app_instance_uuid}
 #beaker.session.data_dir = %(here)s/data/sessions
 
 # SQLAlchemy database URL
-sqlalchemy.url = sqlite:///production.db
+sqlalchemy.url = mysql://${mysql_user}:${mysql_passwd}@${mysql_host}:${mysql_port}/${mysql_db}
 
 # WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*
 # Debug mode will enable the interactive debugging tool, allowing ANYONE to
 # execute malicious code after an exception is raised.
-set debug = false
+set debug = ${debug}
 
+[photosync:worker]
+id = devclient
+server = localhost:11300
+tubes = default
+sqlalchemy.url = sqlite:///%(here)s/development.db
 
 # Logging configuration
 [loggers]
-keys = root
+keys = root, routes, photosync, sqlalchemy
 
 [handlers]
 keys = console
@@ -53,6 +69,25 @@ keys = generic
 level = INFO
 handlers = console
 
+[logger_routes]
+level = INFO
+handlers =
+qualname = routes.middleware
+# "level = DEBUG" logs the route matched and routing variables.
+
+[logger_photosync]
+level = DEBUG
+handlers =
+qualname = photosync
+
+[logger_sqlalchemy]
+level = INFO
+handlers =
+qualname = sqlalchemy.engine
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARN" logs neither.  (Recommended for production systems.)
+
 [handler_console]
 class = StreamHandler
 args = (sys.stderr,)
@@ -60,4 +95,5 @@ level = NOTSET
 formatter = generic
 
 [formatter_generic]
-format = %(asctime)s %(levelname)-5.5s [%(name)s] [%(threadName)s] %(message)s
+format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] [%(threadName)s] %(message)s
+datefmt = %H:%M:%S

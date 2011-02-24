@@ -1,28 +1,20 @@
-This file is for you to describe the photosync application. Typically
-you would include information such as the information below:
+Before you begin
+================
 
-Installation and Setup
-======================
+PhotoSync syncs photos between a number of different services.
+In order to gain api access to these services you'll have to
+register for accounts and setup developer applications and collect
+api keys.
 
-Install ``photosync`` using easy_install::
+Facebook: https://www.facebook.com/developers/createapp.php
 
-    easy_install photosync
-
-Make a config file as follows::
-
-    paster make-config photosync config.ini
-
-Tweak the config file as appropriate and then setup the application::
-
-    paster setup-app config.ini
-
-Then you are ready to go.
+Flickr: http://www.flickr.com/services/apps/create/apply/
 
 
 Setting up an ubuntu development box
 ====================================
 
-You need to install lots of stuff::
+You need to install lots of stuff that you might not have::
 
   sudo apt-get install python-dev git-core build-essential libmysqlclient-dev
   sudo apt-get install mysql-server python-pycurl libcurl3 beanstalkd
@@ -50,6 +42,11 @@ Setup an empty DB called photosync::
 
   mysql -u root -p
   > create database photosync;
+
+Create a configuration file using the helper script.  You will be asked
+to enter information like api keys::
+
+  paster make-config photosync development.ini
 
 Run a script to create all the required tables::
 

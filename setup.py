@@ -38,7 +38,7 @@ setup(
     main = photosync.config.middleware:make_app
 
     [paste.app_install]
-    main = pylons.util:PylonsInstaller
+    main = photosync.installer:PhotosyncInstaller
 
     [paste.paster_command]
     runworker = photosync.worker.commands:RunWorkerCommand
