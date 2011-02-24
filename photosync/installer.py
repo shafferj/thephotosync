@@ -1,3 +1,5 @@
+import os
+
 from pylons.util import PylonsInstaller
 
 def prompt(text, default=None, type=str):
@@ -32,6 +34,8 @@ class PhotosyncInstaller(PylonsInstaller):
         print
         debug = prompt("Turn debug mode on?", default=True, type=bool)
         vars['debug'] = "true" if debug else "false"
+
+        vars['daemon_user'] = vars['daemon_group'] = os.getlogin()
 
         vars['fb_app_id'] = prompt("Facebook App Id")
         vars['fb_api_key'] = prompt("Facebook Api Key")
