@@ -233,7 +233,8 @@ class FullSync(TaskHandler):
             try:
                 img_url = res['sizes']['size'][-1]['source']
             except:
-                import pdb; pdb.set_trace()
+                #import pdb; pdb.set_trace()
+                raise
             log.info("Downloading image %s", img_url)
             filename = '/tmp/photosync/flickr-'+sync.flickrid
             img_request = None

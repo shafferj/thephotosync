@@ -11,6 +11,7 @@ from sqlalchemy.dialects.mysql.base import BIGINT
 from sqlalchemy.orm import relation, backref
 from photosync.model.meta import Session, Base
 from photosync.model.json import Json
+from photosync.model.settings import UserSetting
 from photosync.worker import job
 
 
