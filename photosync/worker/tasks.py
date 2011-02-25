@@ -6,6 +6,7 @@ import time
 import traceback
 import logging
 import tempfile
+import urllib2
 
 from photosync.model.meta import Session
 from photosync.model import User, SyncRecord, AsyncTask
@@ -225,7 +226,7 @@ class FullSync(TaskHandler):
         if not os.path.exists('/tmp/photosync'):
             os.mkdir('/tmp/photosync')
 
-        for photo, request in requests:
+        for i, (photo, request) in enumerate(requests):
             sync = SyncRecord(SyncRecord.TYPE_PHOTO, self.task.user_id)
             sync.flickrid = photo.get("id")
             Session.add(sync)
@@ -236,11 +237,18 @@ class FullSync(TaskHandler):
                 #import pdb; pdb.set_trace()
                 raise
             log.info("Downloading image %s", img_url)
-            filename = '/tmp/photosync/flickr-'+sync.flickrid
+            filename = '/tmp/photosync/flickr-'+sync.flickrid+'.jpg'
             img_request = None
             if not os.path.exists(filename):
-                img_request = http.Request(img_url, filename=filename)
-                fetcher.queue(img_request)
+                f = open(filename, 'wb')
+                f.write(urllib2.urlopen(img_url).read())
+                f.close()
+                on_progress(i, len(requests))
+                # TODO: Figure out why curl isn't working here
+                # for some reason when we use the code below,
+                # the complete file does not get downloaded.
+                #img_request = http.Request(img_url, filename=filename)
+                #fetcher.queue(img_request)
             img_requests.append((photo, filename, sync, img_request))
         Session.commit()
         fetcher.run()
