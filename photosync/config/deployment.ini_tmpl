@@ -39,6 +39,7 @@ photosync.BASE_URL = ${base_url}
 photosync.FLICKR_API_KEY = ${flickr_api_key}
 photosync.FLICKR_API_SECRET = ${flickr_api_secret}
 photosync.DEFAULT_BEANSTALK = localhost:11300
+photosync.DEFAULT_BEANSTALK_TUBE = default
 photosync.FB_GRAPH_ENDPOINT = graph.facebook.com
 
 

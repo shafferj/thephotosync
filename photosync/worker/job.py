@@ -46,7 +46,9 @@ def _get_connection():
     return _connection
 
 
-def register_handler(handler, tube='default', server=None):
+def register_handler(handler, tube=None, server=None):
+    if not tube:
+        tube = g.DEFAULT_BEANSTALK_TUBE
     _handlers[get_handler_name(handler)] = {'handler':handler,
                                             'tube':tube}
 
