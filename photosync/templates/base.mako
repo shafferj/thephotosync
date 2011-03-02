@@ -17,8 +17,10 @@
         % if session.get('user_id'):
         <div id="header-links">
           <a href="/logout">logout</a>
+<!--
           &middot;
           <a id="settings-link">settings</a>
+-->
         </div>
         % endif
       </div>
