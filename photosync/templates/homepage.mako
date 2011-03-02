@@ -61,18 +61,22 @@
   %endif
 
 %else:
+  <div class="last-update">
+
   %if c.next_task:
     <div>
-      next sync in
-      <strong>
+      <span class="time-left">
         ${h.distance_of_time_in_words(c.next_task.time_left, granularity='minute')}
-      </strong>
-      <a href="${c.sync_url}">sync now</a>
+        left
+      </span>
+      until next sync
     </div>
+    <a class="sync-now" href="${c.sync_url}">sync now</a>
   %endif
+
   %if c.last_task:
-    <div>
-    last sync completed
+    <div class="time-since-last-sync">
+    last sync finished
     %if c.last_task.end_time:
       ${h.time_ago_in_words(c.last_task.end_time, granularity='minute')}
       ago
@@ -81,6 +85,9 @@
     %endif
     </div>
   %endif
+
+  </div>
+
 %endif
 </div>
 %endif

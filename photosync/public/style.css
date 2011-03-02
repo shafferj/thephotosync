@@ -128,6 +128,41 @@ div.container {
     color: #555;
 }
 
+#status-box .last-update {
+    border: 1px solid black;
+    padding: 10px;
+    width: 400px;
+    margin: auto;
+    text-align: center;
+}
+#status-box .last-update {
+    color: #aaa;
+}
+#status-box .last-update .time-left {
+    color: #333;
+    display: block;
+    font-size: 30px;
+}
+#status-box .last-update .time-since-last-sync {
+    font-size: smaller;
+}
+#status-box .last-update .sync-now {
+    display: block;
+    margin: 10px auto 35px;
+    padding: 10px;
+    border: 1px solid black;
+    width: 100px;
+    text-align: center;
+    background: #e5ffc0;
+    font-size: 18px;
+}
+#status-box .last-update .sync-now:hover {
+    border: 2px solid black;
+    position: relative;
+    bottom: 1px;
+    margin-bottom: 33px;
+}
+
 #frontpage {
     margin-top: 50px;
 }
