@@ -39,10 +39,11 @@ class SyncController(BaseController):
 
         data = None
         if last:
-            data = dict((attr, getattr(last, attr))
-                        for attr in
-                        ('total_units','completed_units','status_data'))
-            if not any(data.values()):
+            if last.time_left:
                 data = None
+            else:
+                data = dict((attr, getattr(last, attr))
+                            for attr in
+                            ('total_units','completed_units','status_data'))
 
         return json.dumps(data)

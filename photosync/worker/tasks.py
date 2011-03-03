@@ -63,8 +63,14 @@ class TaskHandler(object):
         return get_handler_name(cls)
 
     @classmethod
+    def get_initial_status(cls, task):
+        #override this to set the initial status of the task
+        return (None, None, '')
+
+    @classmethod
     def submit_advanced(cls, args, kwargs, delay=0, user_id=None):
         task = AsyncTask(user_id=user_id)
+        task.set_status(*cls.get_initial_status())
         task.type = cls.get_type()
         Session.add(task)
         Session.commit()
@@ -116,6 +122,9 @@ class FlickrRequest(http.Request):
 @register
 class FullSync(TaskHandler):
 
+    @classmethod
+    def get_initial_status(cls):
+        return (None, None, "Waiting for syncer to become available...")
 
     def run(self, user_id):
         self.user = User.get_by_id(user_id)
@@ -128,7 +137,10 @@ class FullSync(TaskHandler):
         for photoset in photosets:
             self.total_photos += int(photoset.get('photos'))
 
-        self.set_status(self.synced_photos, self.total_photos, "syncing Flickr photos to Facebook")
+        self.set_status(
+            self.synced_photos,
+            self.total_photos,
+            "syncing Flickr photos to Facebook")
 
         self.fb_privacy = UserSetting.get(setting=UserSettingConst.FB_PRIVACY)
 

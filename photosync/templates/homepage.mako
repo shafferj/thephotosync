@@ -58,7 +58,7 @@
 
 
   %if c.current_task.percentComplete is None:
-    ${p.progress_bar(0, "Starting...")}
+    ${p.progress_bar(0, c.current_task.status_data)}
   %else:
     ${p.progress_bar(c.current_task.percentComplete, c.current_task.status_data)}
     <div class="stats">
