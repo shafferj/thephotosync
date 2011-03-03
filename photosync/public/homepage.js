@@ -4,6 +4,15 @@ var UPDATE_TIME = 1000;
 function update() {
   $.getJSON('/sync/status', function(task) {
     if (!task) {
+      $('#status-box').find('.progress').animate({
+          width: '100%'
+        }, {
+          duration: 600,
+          complete: function() {
+            $('#status-box').find('.message').html("...all done");
+            window.location.reload();
+          }
+        }).end();
       return;
     }
     $('#status-box')

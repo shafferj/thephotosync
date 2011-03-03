@@ -42,5 +42,7 @@ class SyncController(BaseController):
             data = dict((attr, getattr(last, attr))
                         for attr in
                         ('total_units','completed_units','status_data'))
+            if not any(data.values()):
+                data = None
 
         return json.dumps(data)
