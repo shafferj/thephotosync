@@ -1,6 +1,7 @@
 import json
 import time
 import logging
+import multiprocessing
 
 import beanstalkc
 from photosync.model.meta import Session
@@ -14,8 +15,7 @@ def task_ping(worker, job):
     log.info("ping %s", job.data)
     return "pong %s" % job.data
 
-def run_worker(host, port, tubes=()):
-
+def run_loop(host, port, tubes=()):
     log.info("Starting photosync worker")
     log.info("Connecting to server: %s:%s", host, port)
 
@@ -29,3 +29,19 @@ def run_worker(host, port, tubes=()):
         job = beanstalk.reserve()
         log.info("Processing job %s", job.jid)
         Job(beanstalk_job=job).run()
+
+def run_worker(host, port, tubes=(), pool_size=None):
+    # Weeee! we're going to create a pool and run tons of workers!
+    pool_size = pool_size or multiprocessing.cpu_count()
+
+    print "Kicking off %s worker processes" % pool_size
+
+    if pool_size > 1:
+        pool = multiprocessing.Pool(pool_size - 1)
+        for i in xrange(pool_size-1):
+            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
+            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
+            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
+            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
+
+    run_loop(host, port, tubes=tubes)

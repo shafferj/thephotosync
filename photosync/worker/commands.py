@@ -213,7 +213,7 @@ class RunWorkerCommand(Command):
         host, port = get_or_raise('server').split(':')
         tubes = config.get('tubes')
         tubes = tubes.split(' ') if tubes else ()
-        run_worker(host, port, tubes)
+        run_worker(host, port, tubes, int(config.get('pool_size', 1)))
 
 
     def daemonize(self):
