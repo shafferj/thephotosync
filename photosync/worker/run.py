@@ -21,9 +21,17 @@ def run_loop(host, port, tubes=()):
 
     beanstalk = beanstalkc.Connection(host=host, port=int(port))
 
-    log.info("Watching tubes: %s", ', '.join(tubes))
+
     for tube in tubes:
         beanstalk.watch(tube)
+
+    # stop watching all other tubes, including default
+    # we have to do this second because beanstalk must
+    # always watch at least one tube.
+    for tube in beanstalk.watching():
+        if tube not in tubes:
+            beanstalk.ignore(tube)
+    log.info("Watching tubes: %s", ', '.join(beanstalk.watching()))
 
     while True:
         job = beanstalk.reserve()
@@ -34,14 +42,11 @@ def run_worker(host, port, tubes=(), pool_size=None):
     # Weeee! we're going to create a pool and run tons of workers!
     pool_size = pool_size or multiprocessing.cpu_count()
 
-    print "Kicking off %s worker processes" % pool_size
+    log.info("Kicking off %s worker processes", pool_size)
 
     if pool_size > 1:
         pool = multiprocessing.Pool(pool_size - 1)
         for i in xrange(pool_size-1):
-            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
-            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
-            pool.apply_async(run_loop, [host, port], {'tubes':tubes})
             pool.apply_async(run_loop, [host, port], {'tubes':tubes})
 
     run_loop(host, port, tubes=tubes)

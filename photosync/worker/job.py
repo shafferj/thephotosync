@@ -14,11 +14,14 @@ _handlers = {}
 
 STATE_BURIED = 'buried'
 
+DEFAULT_TUBE = 'default'
+DEFAULT_BEANSTALK = 'localhost:11300'
+
 
 def get_handler_name(handler):
     return '%s:%s' % (handler.__module__, handler.__name__)
 
-def register(tube='default', server=None):
+def register(tube=None, server=None):
     def decorator(func):
         if inspect.isclass(func):
             @wraps(func)
@@ -32,7 +35,7 @@ def register(tube='default', server=None):
 
     if callable(tube) or inspect.isclass(tube):
         func = tube
-        tube = 'default'
+        tube = None
         return decorator(func)
     return decorator
 
@@ -41,14 +44,15 @@ _connection = None
 def _get_connection():
     global _connection
     if not _connection:
-        host, port = g.DEFAULT_BEANSTALK.split(':')
+        try:
+            host, port = g.DEFAULT_BEANSTALK.split(':')
+        except TypeError:
+            host, port = DEFAULT_BEANSTALK.split(':')
         _connection = beanstalkc.Connection(host=host, port=int(port))
     return _connection
 
 
 def register_handler(handler, tube=None, server=None):
-    if not tube:
-        tube = g.DEFAULT_BEANSTALK_TUBE
     _handlers[get_handler_name(handler)] = {'handler':handler,
                                             'tube':tube}
 
@@ -72,10 +76,17 @@ def submit_advanced(handler, args, kwargs, **put_kwargs):
                'kwargs':kwargs}
     data = json.dumps(payload)
 
-    host, port = g.DEFAULT_BEANSTALK.split(':')
     connection = _get_connection()
-    if 'tube' in handler_config:
-        connection.use(handler_config['tube'])
+
+    tube = handler_config.get('tube')
+    if not tube:
+        try:
+            # TODO: stop using pylons global object for configuration
+            tube = g.DEFAULT_BEANSTALK_TUBE
+        except TypeError:
+            tube = DEFAULT_TUBE
+
+    connection.use(tube)
     id = connection.put(data, **put_kwargs)
     return id
 
