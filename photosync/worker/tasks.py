@@ -235,8 +235,10 @@ class FullSync(TaskHandler):
         fetcher = http.Fetcher(progress_callback=on_progress)
         img_requests = []
 
+        # TODO: make tmp directory path configurable
         if not os.path.exists('/tmp/photosync'):
             os.mkdir('/tmp/photosync')
+            os.chmod('/tmp/photosync', 0777)
 
         for i, (photo, request) in enumerate(requests):
             sync = SyncRecord(SyncRecord.TYPE_PHOTO, self.task.user_id)
