@@ -16,18 +16,24 @@
   <div class="profiles">
     <table>
       <tr>
-        <td>
-          <img class="profile-pic" src="${c.flickr_user.profile_pic_url}" />
-          <br />
-          <a target="_new" href="${c.flickr_user.link}">${c.flickr_user.name}</a>
+        <td class="flickr">
+          <a target="_new" href="${c.flickr_user.link}">
+            <img class="profile-pic" src="${c.flickr_user.profile_pic_url}" />
+            <br />
+            <img class="icon" src="/flickr-icon.gif"/>
+            ${c.flickr_user.name}
+          </a>
         </td>
         <td class="arrow">
           ➞
         </td>
-        <td>
-          <img class="profile-pic" src="${c.fb_user.profile_pic_url}" />
-          <br />
-          <a target="_new" href="${c.fb_user.link}">${c.fb_user.name}</a>
+        <td class="facebook">
+          <a target="_new" href="${c.fb_user.link}">
+            <img class="profile-pic" src="${c.fb_user.profile_pic_url}" />
+            <br />
+            <img class="icon" src="/facebook-icon.gif"/>
+            ${c.fb_user.name}
+          </a>
         </td>
       </tr>
     </table>
