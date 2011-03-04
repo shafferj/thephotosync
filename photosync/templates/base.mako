@@ -17,15 +17,21 @@
         % if session.get('user_id'):
         <div id="header-links">
           <a href="/logout">logout</a>
-<!--
           &middot;
-          <a id="settings-link">settings</a>
--->
+          <a href="/settings">settings</a>
         </div>
         % endif
       </div>
     </div>
     <div id="main" class="container">
+      <% messages = h.flash.pop_messages() %>
+      % if messages:
+      <ul id="flash-messages">
+        % for message in messages:
+        <li>${message}</li>
+        % endfor
+      </ul>
+      % endif
       ${next.body()}
     </div>
     <div id="footer" class="container">

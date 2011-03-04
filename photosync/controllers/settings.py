@@ -5,6 +5,7 @@ from pylons.controllers.util import abort, redirect
 
 from photosync.lazy import lazy
 from photosync.lib.base import BaseController, render
+from photosync.lib import helpers as h
 from photosync import fb
 from photosync.model.settings import UserSetting, UserSettingConst
 from photosync.model import User
@@ -29,8 +30,8 @@ class SettingsController(BaseController):
         flickr_settings['select_sets'] = bool(request.POST.get('select_sets'))
         flickr_settings['selected_sets'] = request.POST.getall('selected_sets')
         UserSetting.set(UserSettingConst.FLICKR_SET_SYNCING, flickr_settings)
-
-        redirect(url('settings'))
+        h.flash("Your settings have been updated.")
+        redirect(url('index'))
 
     def index(self):
         c.fb_privacy_setting = self.settings.get(UserSettingConst.FB_PRIVACY, 'FB_DEFAULT')

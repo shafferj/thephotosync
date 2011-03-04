@@ -29,6 +29,20 @@ a:hover {
     color: #000;
 }
 
+label input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+fieldset {
+  margin-bottom: 10px;
+  padding: 5px 0 0;
+}
+fieldset legend {
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+}
+
 #settings {
     position: absolute;
     margin: auto;
@@ -99,6 +113,12 @@ div.container {
     text-align: center;
     line-height: 60px;
     background: white;
+}
+
+#flash-messages {
+    text-align: center;
+    color: red;
+    clear: both;
 }
 
 #status-box {
@@ -311,4 +331,8 @@ img.profile-pic {
 
 .hidden {
   display: none;
+}
+
+#flickr_set_list ul {
+  padding-left: 1em;
 }
