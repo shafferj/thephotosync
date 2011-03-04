@@ -308,3 +308,7 @@ img.profile-pic {
     border-right: 0;
     border-right: 2px solid #f00;
 }
+
+.hidden {
+  display: none;
+}

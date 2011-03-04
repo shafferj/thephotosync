@@ -52,4 +52,8 @@ class UserSetting(Base):
 
 
 class UserSettingConst:
+    ## facebook privacy settings when uploading photos to facebook
     FB_PRIVACY = 1
+
+    ## flickr syncing settings
+    FLICKR_SET_SYNCING = 2
