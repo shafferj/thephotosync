@@ -52,6 +52,7 @@ photosync.FB_GRAPH_ENDPOINT = graph.facebook.com
 
 # SQLAlchemy database URL
 sqlalchemy.url = mysql://${mysql_user}:${mysql_passwd}@${mysql_host}:${mysql_port}/${mysql_db}
+sqlalchemy.pool_recycle = 3600
 
 # WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*
 # Debug mode will enable the interactive debugging tool, allowing ANYONE to
@@ -63,6 +64,10 @@ id = devclient
 server = localhost:11300
 tubes = default
 sqlalchemy.url = mysql://${mysql_user}:${mysql_passwd}@${mysql_host}:${mysql_port}/${mysql_db}
+sqlalchemy.pool_recycle = 3600
+photosync.DEFAULT_BEANSTALK = localhost:11300
+photosync.DEFAULT_BEANSTALK_TUBE = default
+
 # uncomment the line below to run multiple worker proceses.
 # by default, one worker process will be spawned for each
 # cpu on the mahcine
