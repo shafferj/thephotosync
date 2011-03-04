@@ -140,16 +140,21 @@ class FullSync(TaskHandler):
             self.total_photos,
             "syncing Flickr photos to Facebook")
 
-        self.fb_privacy = UserSetting.get(setting=UserSettingConst.FB_PRIVACY)
+        settings = UserSetting.multiget(
+            user_id=user_id,
+            settings=[UserSettingConst.FB_PRIVACY,
+                      UserSettingConst.FLICKR_SET_SYNCING])
+        self.fb_privacy = settings.get(UserSettingConst.FB_PRIVACY, 'FB_DEFAULT')
+        self.flickr_settings = settings.get(UserSettingConst.FLICKR_SET_SYNCING, {})
 
+        select_sets = self.flickr_settings.get('select_sets', False)
+        selected_sets = self.flickr_settings.get('selected_sets', [])
         for photoset in photosets:
-            self.sync_photoset(photoset)
+            if not select_sets or photoset.get('id') in selected_sets:
+                self.sync_photoset(photoset)
 
         # once we are all done, let's submit the task to rerun in an hour.
         self.resubmit(delay=60*60)
-
-    def on_fetcher_progress(self, processed, total):
-        self.job.touch()
 
     def sync_photoset(self, photoset):
         log.info("Syncing flickr photoset %s to facebook", photoset.get('id'))
