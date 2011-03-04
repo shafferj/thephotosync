@@ -133,9 +133,7 @@ class FullSync(TaskHandler):
         photosets = self.fk.photosets_getList()[0]
 
         self.synced_photos = 0
-        self.total_photos = 0
-        for photoset in photosets:
-            self.total_photos += int(photoset.get('photos'))
+        self.total_photos = sum(int(pset.get('photos')) for pset in photosets)
 
         self.set_status(
             self.synced_photos,
@@ -197,9 +195,7 @@ class FullSync(TaskHandler):
             if not fb_photo:
                 photos_to_sync.append(photo)
 
-        already_synced = len(photos) - len(photos_to_sync)
-        self.synced_photos += already_synced
-        status = "%s photos from %s already synced" % (already_synced,
+        status = "%s photos from %s already synced" % (self.synced_photos,
                                                        photoset.find('title').text)
         self.set_status(self.synced_photos, self.total_photos, status)
 
