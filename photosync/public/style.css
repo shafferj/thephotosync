@@ -171,8 +171,16 @@ div.container {
 }
 
 #frontpage {
-    margin-top: 50px;
 }
+
+#frontpage .fb-connected-friends {
+    border: none;
+    overflow: hidden;
+    width: 500px;
+    height: 70px;
+    margin: 0 0 0 125px;
+}
+
 #frontpage .step {
     min-height: 150px;
     text-align: center;

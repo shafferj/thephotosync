@@ -2,6 +2,11 @@
 
 <div id="frontpage">
 
+  <iframe src="http://www.facebook.com/plugins/facepile.php?app_id=${app_globals.FB_APP_ID}"
+          class="fb-connected-friends"
+          scrolling="no"
+          frameborder="0"
+          allowTransparency="true"></iframe>
 
   %if not c.fb_user:
   <div class="step">
