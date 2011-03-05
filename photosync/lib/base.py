@@ -4,6 +4,9 @@ Provides the BaseController class for subclassing.
 """
 from pylons.controllers import WSGIController
 from pylons.templating import render_mako as render
+from pylons import app_globals as g
+
+from webob.exc import HTTPException, HTTPNotFound
 
 from photosync.lazy import lazy
 from photosync.model import User
@@ -24,3 +27,11 @@ class BaseController(WSGIController):
             return WSGIController.__call__(self, environ, start_response)
         finally:
             Session.remove()
+
+
+class AdminController(BaseController):
+
+    def __before__(self):
+        admins = g.ADMIN_FB_UIDS.split()
+        if str(self.logged_in_user.fb_uid) not in admins:
+            raise HTTPNotFound()

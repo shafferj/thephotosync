@@ -32,6 +32,7 @@ beaker.session.key = photosync
 beaker.session.secret = ${app_instance_secret}
 app_instance_uuid = ${app_instance_uuid}
 
+photosync.ADMIN_FB_UIDS = ${admin_fb_uids}
 photosync.FB_APP_ID = ${fb_app_id}
 photosync.FB_API_KEY = ${fb_api_key}
 photosync.FB_APP_SECRET = ${fb_app_secret}

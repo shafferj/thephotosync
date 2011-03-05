@@ -57,4 +57,5 @@ class PhotosyncInstaller(PylonsInstaller):
 
         vars['port'] = prompt("Run the server on port", default="8080")
 
+        vars['admin_fb_uids'] = prompt("Your facebook user id (for admin rights)")
         return super(PhotosyncInstaller, self).config_content(command, vars)
