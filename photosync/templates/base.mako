@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css"
           href="http://yui.yahooapis.com/combo?2.6.0/build/reset-fonts/reset-fonts.css" />
     <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="icon" type="image/gif" href="/logo16x16.gif" />
     <script type="text/javascript"
             src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
   </head>
