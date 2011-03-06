@@ -6,7 +6,7 @@ import datetime
 from pylons import session
 
 from sqlalchemy import (desc, Column, String, UnicodeText, Integer,
-                        ForeignKey, DateTime)
+                        ForeignKey, DateTime, Float)
 from sqlalchemy.dialects.mysql.base import BIGINT
 from sqlalchemy.orm import relation, backref
 from photosync.model.meta import Session, Base
@@ -164,6 +164,9 @@ class SyncRecord(Base):
     user_id = Column('user_id', Integer, ForeignKey('users.id'))
     status = Column('status', Integer)
     type = Column('type', Integer, index=True)
+    # number of bytes transferred in and out of the service.
+    transfer_in = Column('transfer_in', Integer)
+    transfer_out = Column('transfer_out', Integer)
     user = relation('User', backref=backref('sync_records', order_by=timestamp))
 
     def __init__(self, type, user_id=None):

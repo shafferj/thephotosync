@@ -32,7 +32,7 @@ class RunWorkerCommand(Command):
     summary = __doc__.splitlines()[0]
     usage = '\n' + __doc__
 
-    takes_config_file = 1
+    takes_config_file = True
     requires_config_file = True
 
     min_args = 0

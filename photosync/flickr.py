@@ -56,4 +56,5 @@ def get_url(token, **params):
     params.setdefault('auth_token', fk.token_cache.token)
     params.setdefault('api_key', fk.api_key)
     params.setdefault('format', 'json')
+    params.setdefault('nojsoncallback', '1')
     return "http://" + fk.flickr_host + fk.flickr_rest_form + '?' + fk.encode_and_sign(params)

@@ -21,6 +21,7 @@ setup(
         "pycurl",
         "beanstalkc",
         "PyYAML",
+        "functional",
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
@@ -42,8 +43,6 @@ setup(
 
     [paste.paster_command]
     runworker = photosync.worker.commands:RunWorkerCommand
-
-    [console_scripts]
-    photosync_worker = photosync.worker.run:main
+    migrate = photosync.migrations.commands:RunMigrationCommand
     """,
 )

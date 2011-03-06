@@ -111,14 +111,6 @@ class LongPing(TaskHandler):
         return "all done"
 
 
-class FlickrRequest(http.Request):
-
-    def read_response(self):
-        raw = super(FlickrRequest, self).read_response()
-        if raw.startswith('jsonFlickrApi('):
-            return json.loads(raw[len('jsonFlickrApi('):-1])
-        return raw
-
 @register
 class FullSync(TaskHandler):
 
@@ -221,7 +213,7 @@ class FullSync(TaskHandler):
                 self.user.flickr_token,
                 method='flickr.photos.getSizes',
                 photo_id=photo.get('id'))
-            request = FlickrRequest(url)
+            request = http.JsonRequest(url)
             requests.append((photo, request))
             fetcher.queue(request)
         fetcher.run()
@@ -269,11 +261,13 @@ class FullSync(TaskHandler):
         fetcher.run()
 
         for photo, temp_filename, sync, img_request in img_requests:
+            sync.transfer_in = os.path.getsize(temp_filename)
             graph_photo = album.photos.add(temp_filename, photo.get('title'))
             os.remove(temp_filename)
             if graph_photo:
                 sync.fbid = graph_photo.id
                 sync.status = SyncRecord.STATUS_SUCCESS
+                sync.transfer_out = sync.transfer_in
             else:
                 sync.status = SyncRecord.STATUS_FAILED
             Session.commit()
