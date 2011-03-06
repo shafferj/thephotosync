@@ -1,4 +1,5 @@
 # Implement a scalable http client using pycurl
+import re
 import time
 import json
 import pycurl
@@ -24,6 +25,7 @@ class File(object):
     def __repr__(self):
         return repr(self.path)
 
+HEADERS_RE = re.compile(r"(?P<name>.*?): (?P<value>.*?)\r\n")
 
 class Request(object):
 
@@ -48,6 +50,13 @@ class Request(object):
         else:
             return StringIO()
 
+    @lazy
+    def response_headers(self):
+        return StringIO()
+
+    def read_headers(self):
+        return dict(HEADERS_RE.findall(self.response_headers.getvalue()))
+
     def read_response(self):
         if self.filename:
             self.response.close()
@@ -67,6 +76,7 @@ class JsonRequest(Request):
 
 class Fetcher(object):
     def __init__(self, maxconns=5, progress_callback=None):
+        self._requests = []
         self._queue = []
         self._curler = pycurl.CurlMulti()
         self._curler.handles = []
@@ -83,8 +93,14 @@ class Fetcher(object):
             self._curler.handles.append(c)
 
     def queue(self, request):
-        self._queue.append(request)
+        if request:
+            self._queue.append(request)
+        self._requests.append(request)
         return self
+
+    def __iter__(self):
+        for request in self._requests:
+            yield request
 
     def run(self):
 
@@ -108,6 +124,7 @@ class Fetcher(object):
 
                 c = freelist.pop()
                 c.setopt(c.WRITEFUNCTION, request.response.write)
+                c.setopt(c.HEADERFUNCTION, request.response_headers.write)
                 c.setopt(c.URL, str(request.url))
                 c.setopt(c.VERBOSE, 1 if request.verbose else 0)
 
@@ -146,6 +163,7 @@ class Fetcher(object):
                     break
 
             self._curler.select(1.0)
+        return self
 
 
 if __name__ == '__main__':
