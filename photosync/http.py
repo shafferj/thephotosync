@@ -127,6 +127,8 @@ class Fetcher(object):
                 c.setopt(c.HEADERFUNCTION, request.response_headers.write)
                 c.setopt(c.URL, str(request.url))
                 c.setopt(c.VERBOSE, 1 if request.verbose else 0)
+                if request.method == "HEAD":
+                    c.setopt(c.NOBODY, 1)
 
                 if request.method == "POST":
                     c.setopt(c.HTTPPOST, post_fields)
