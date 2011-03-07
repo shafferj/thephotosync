@@ -41,92 +41,64 @@
 
 
 
-%if c.current_task:
+  %if c.current_task:
 
-  %if c.current_task.is_buried:
-    <div class="error">
-      I've been having a hard time syncing your photos and decided to give up
-      for the time being.  You might try
-      <a href="${c.sync_url}">kicking me</a>, but no guarantees I'll
-      start working again.
-    </div>
-  %else:
-
-    <script src="/homepage.js"></script>
-
-  %endif
-
-
-  %if c.current_task.percentComplete is None:
-    ${p.progress_bar(0, c.current_task.status_data)}
-  %else:
-    ${p.progress_bar(c.current_task.percentComplete, c.current_task.status_data)}
-    <div class="stats">
-      ${c.current_task.completed_units}/${c.current_task.total_units}
-    </div>
-  %endif
-
-%else:
-  <div class="last-update">
-
-  %if c.next_task:
-    <div>
-      <span class="time-left">
-        ${h.distance_of_time_in_words(c.next_task.time_left, granularity='minute')}
-        left
-      </span>
-      until next sync
-    </div>
-    <a class="sync-now" href="${c.sync_url}">sync now</a>
-  %endif
-
-  %if c.last_task:
-    <div class="time-since-last-sync">
-    last sync finished
-    %if c.last_task.end_time:
-      ${h.time_ago_in_words(c.last_task.end_time, granularity='minute')}
-      ago
+    %if c.current_task.is_buried:
+      <div class="error">
+        I've been having a hard time syncing your photos and decided to give up
+        for the time being.  You might try
+        <a href="${c.sync_url}">kicking me</a>, but no guarantees I'll
+        start working again.
+      </div>
     %else:
-      ${c.last_task.queue_id}
+
+      <script src="/homepage.js"></script>
+
     %endif
+
+
+    %if c.current_task.percentComplete is None:
+      ${p.progress_bar(0, c.current_task.status_data)}
+    %else:
+      ${p.progress_bar(c.current_task.percentComplete, c.current_task.status_data)}
+      <div class="stats">
+        ${c.current_task.completed_units}/${c.current_task.total_units}
+      </div>
+    %endif
+
+  %else:
+    <div class="last-update">
+
+    %if c.next_task:
+      <div>
+        <span class="time-left">
+          ${h.distance_of_time_in_words(c.next_task.time_left, granularity='minute')}
+          left
+        </span>
+        until next sync
+      </div>
+      <a class="sync-now" href="${c.sync_url}">sync now</a>
+    %endif
+
+    %if c.last_task:
+      <div class="time-since-last-sync">
+      last sync finished
+      %if c.last_task.end_time:
+        ${h.time_ago_in_words(c.last_task.end_time, granularity='minute')}
+        ago
+      %else:
+        ${c.last_task.queue_id}
+      %endif
+      </div>
+    %endif
+
     </div>
+
+    <div class="account-stats">
+      You've transfered ${round(c.bytes_transferred, 2)} MB at a cost of
+      $${round(c.cost, 3)}
+    </div>
+
   %endif
-
-  </div>
-
-%endif
 </div>
 %endif
-
-<div id="settings" style="${'display:none;' if c.tasks else ''}">
-  <table>
-    <tr>
-      <td>
-        Facebook Account:
-      </td>
-      <td>
-        <strong>${c.fb_user.first_name} ${c.fb_user.last_name}</strong>
-      </td>
-    </tr>
-
-    <tr>
-      <td>
-        Flickr Account:
-      </td>
-      <td>
-        %if c.flickr_user:
-        <strong>${c.flickr_user.username}</strong>
-        %else:
-        <a href="${c.flickr_connect_url}">Connect</a>
-        %endif
-      </td>
-    </tr>
-
-    <tr>
-      <td></td>
-      <td class="buttons">
-        <a class="button" onclick="$('#settings').fadeToggle();">Ok</a>
-      </td>
-      </tr>
-  </table>
-</div>

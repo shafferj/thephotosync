@@ -197,3 +197,11 @@ class SyncRecord(Base):
             .limit(limit)
 
         return query
+
+    @staticmethod
+    def get_bytes_transfered_by_user(user_id):
+        bytes_in, bytes_out = Session.execute(
+            "SELECT SUM(transfer_in), SUM(transfer_out) "
+            "FROM sync_records WHERE user_id=:id",
+            {'id':user_id}).fetchone()
+        return int(bytes_in), int(bytes_out)

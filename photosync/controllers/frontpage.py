@@ -81,6 +81,13 @@ class FrontpageController(BaseController):
                     else:
                         c.current_task = task
 
+            bytes_in, bytes_out = SyncRecord.get_bytes_transfered_by_user(self.user.id)
+            c.bytes_transferred = bytes_in/1024.**2
+
+            # cost is $0.10 per GB transferred in and
+            # $0.15 per GB transferred out
+            c.cost = bytes_in/1024.**3 * 0.1 + bytes_out/1024.**3 * 0.15
+
         if c.tasks:
             return render('/homepage.mako')
 

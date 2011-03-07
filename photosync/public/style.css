@@ -190,6 +190,13 @@ div.container {
     margin-bottom: 33px;
 }
 
+#status-box .account-stats {
+    text-align: center;
+    font-size: smaller;
+    color: #555;
+    margin-top: 10px;
+}
+
 #frontpage {
 }
 
