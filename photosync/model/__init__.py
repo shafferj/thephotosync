@@ -204,4 +204,4 @@ class SyncRecord(Base):
             "SELECT SUM(transfer_in), SUM(transfer_out) "
             "FROM sync_records WHERE user_id=:id",
             {'id':user_id}).fetchone()
-        return int(bytes_in), int(bytes_out)
+        return int(bytes_in or 0), int(bytes_out or 0)
