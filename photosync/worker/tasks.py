@@ -246,8 +246,8 @@ class FullSync(TaskHandler):
             except:
                 #import pdb; pdb.set_trace()
                 raise
-            log.info("Downloading image %s", img_url)
             filename = '/tmp/photosync/flickr-'+sync.flickrid+'.jpg'
+            log.info("Downloading image %s to %s", img_url, filename)
             img_request = None
             if not os.path.exists(filename):
                 f = open(filename, 'wb')
@@ -265,7 +265,13 @@ class FullSync(TaskHandler):
 
         for photo, temp_filename, sync, img_request in img_requests:
             sync.transfer_in = os.path.getsize(temp_filename)
-            graph_photo = album.photos.add(temp_filename, photo.get('title'))
+            log.info("Uploading image %s to facebook", temp_filename)
+            graph_photo = None
+            try:
+                graph_photo = album.photos.add(temp_filename, photo.get('title'))
+            except TypeError, e:
+                log.error("Error uploading image %s", temp_filename)
+                log.exception(e)
             os.remove(temp_filename)
             if graph_photo:
                 sync.fbid = graph_photo.id
