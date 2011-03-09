@@ -178,6 +178,9 @@ class FullSync(TaskHandler):
 
         photos = self.fk.photosets_getPhotos(photoset_id=photoset.get('id'))[0]
 
+        # max out at 200 photos until we figure out what to do with bigger sets
+        photos = photos[:200]
+
         photos_to_sync = []
         for photo in photos:
             log.info("Syncing flickr photo %s to facebook", photo.get('id'))
