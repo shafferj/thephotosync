@@ -162,7 +162,9 @@ class GraphEndpoint(Graph):
     data = property(lambda self: self.get(self.path))
 
     def __repr__(self):
-        return '<%s>' % (self.__class__.__name__)
+        return '<%s %s %r>' % (self.__class__.__name__,
+                               self.path,
+                               self._cache.get(self.path))
 
 
 class GraphObject(GraphEndpoint):

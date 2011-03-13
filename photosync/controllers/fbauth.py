@@ -7,6 +7,7 @@ from photosync.lib.base import BaseController, render
 from photosync import fb
 from photosync.model import User
 from photosync.model.meta import Session
+
 log = logging.getLogger(__name__)
 
 class FbauthController(BaseController):
@@ -25,6 +26,7 @@ class FbauthController(BaseController):
             user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
 
         if user:
+            # the user does have an account, let's update their auth token
             user.fb_uid = fbuser.id
             user.fb_access_token = token
             Session.commit()
@@ -36,6 +38,11 @@ class FbauthController(BaseController):
             Session.add(user)
             Session.commit()
             user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
+
+        if not user:
+            log.error("Trying to log in, but couldn't get a user object. "
+                      "user=%r code=%r token=%r fbuser=%r",
+                      user, code, token, fbuser)
 
         session['user_id'] = user.id
         session['fb_access_token'] = token
