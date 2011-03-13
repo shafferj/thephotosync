@@ -10,7 +10,7 @@
     <script type="text/javascript"
             src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
 
-    % if app_globals.GOOGLE_ANALYTICS_ID
+    %if app_globals.GOOGLE_ANALYTICS_ID:
     <script type="text/javascript">
 
       var _gaq = _gaq || [];

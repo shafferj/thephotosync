@@ -26,6 +26,7 @@ port = ${port}
 use = egg:photosync
 full_stack = true
 static_files = true
+filter-with = translogger
 
 cache_dir = %(here)s/data
 beaker.session.key = photosync
@@ -76,15 +77,25 @@ photosync.DEFAULT_BEANSTALK_TUBE = default
 # cpu on the mahcine
 #pool_size = 10
 
+[filter:translogger]
+use = egg:Paste#translogger
+setup_console_handler = False
+
 # Logging configuration
 [loggers]
-keys = root, routes, photosync, sqlalchemy
+keys = root, routes, photosync, sqlalchemy, wsgi
 
 [handlers]
-keys = console
+keys = console, errorlog, accesslog
 
 [formatters]
-keys = generic
+keys = generic, accesslog
+
+[logger_wsgi]
+level = INFO
+handlers = accesslog
+qualname = wsgi
+propagate = 0
 
 [logger_root]
 level = INFO
@@ -115,6 +126,21 @@ args = (sys.stderr,)
 level = NOTSET
 formatter = generic
 
+[handler_errorlog]
+class = logging.handlers.TimedRotatingFileHandler
+args = ('error.log','midnight')
+level = ERROR
+formatter = generic
+
+[handler_accesslog]
+class = logging.handlers.TimedRotatingFileHandler
+args = ('access.log','midnight')
+level = INFO
+formatter = accesslog
+
 [formatter_generic]
 format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] [%(threadName)s] %(message)s
 datefmt = %H:%M:%S
+
+[formatter_accesslog]
+format = %(message)s
