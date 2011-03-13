@@ -12,6 +12,8 @@ log = logging.getLogger(__name__)
 
 class FlickrauthController(BaseController):
 
+    requires_logged_in_user = False
+
     def index(self):
         flickr = FlickrAPI()
         token = flickr.get_token(request.GET.getone('frob'))

@@ -20,18 +20,12 @@ log = logging.getLogger(__name__)
 
 class FrontpageController(BaseController):
 
-    @lazy
-    def user(self):
-        return User.get_current_user()
+    requires_logged_in_user = False
 
     def home(self):
         c.picasa_connect_url = picasa.get_authorization_url()
-        c.flickr_connect_url = flickr.get_authorization_url('write')
-        c.fb_connect_url = fb.get_authorization_url([
-                'user_photos',
-                'publish_stream',
-                'offline_access',
-                ])
+        c.flickr_connect_url = flickr.get_authorization_url()
+        c.fb_connect_url = fb.get_authorization_url()
         c.fbuser = fb.GraphUser()
         c.picasa_user = None
         if session.get('picasa_token'):
@@ -53,22 +47,18 @@ class FrontpageController(BaseController):
         return render('/homepage.mako')
 
     def index(self):
-        c.user = self.user
-        c.fb_connect_url = fb.get_authorization_url([
-                'user_photos',
-                'publish_stream',
-                'offline_access',
-                ])
-        c.flickr_connect_url = flickr.get_authorization_url('write')
-        if self.user:
-            if self.user.fb_access_token:
+        c.user = self.logged_in_user
+        c.fb_connect_url = fb.get_authorization_url()
+        c.flickr_connect_url = flickr.get_authorization_url()
+        if self.logged_in_user:
+            if self.logged_in_user.fb_access_token:
                 c.fb_user = fb.GraphUser(
-                    id=self.user.fb_uid,
-                    access_token=self.user.fb_access_token)
-            if self.user.flickr_token:
+                    id=self.logged_in_user.fb_uid,
+                    access_token=self.logged_in_user.fb_access_token)
+            if self.logged_in_user.flickr_token:
                 c.flickr_user = flickr.FlickrUser(
-                    token=self.user.flickr_token)
-            if self.user.flickr_token and self.user.fb_access_token:
+                    token=self.logged_in_user.flickr_token)
+            if self.logged_in_user.flickr_token and self.logged_in_user.fb_access_token:
                 c.tasks = AsyncTask.get_for_user(
                     limit=2,
                     type=FullSync.get_type()).all()
@@ -81,7 +71,7 @@ class FrontpageController(BaseController):
                     else:
                         c.current_task = task
 
-            bytes_in, bytes_out = SyncRecord.get_bytes_transfered_by_user(self.user.id)
+            bytes_in, bytes_out = SyncRecord.get_bytes_transfered_by_user(self.logged_in_user.id)
             c.bytes_transferred = bytes_in/1024.**2
 
             # cost is $0.10 per GB transferred in and

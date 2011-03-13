@@ -45,7 +45,7 @@ class FlickrUser(FlickrAPI):
                 self._info.get('iconfarm'), iconserver, self.nsid)
         return 'http://www.flickr.com/images/buddyicon.jpg'
 
-def get_authorization_url(perms=''):
+def get_authorization_url(perms='write'):
     return FlickrAPI().web_login_url(perms=perms)
 
 

@@ -31,7 +31,9 @@ def get_graph_url(path, args=None):
 def get_auth_redirect_url():
     return g.BASE_URL + u'/fb/auth_redirect'
 
-def get_authorization_url(scope=[]):
+def get_authorization_url(scope=['user_photos',
+                                 'publish_stream',
+                                 'offline_access',]):
     return get_graph_url('/oauth/authorize',
                          {'client_id':g.FB_APP_ID,
                           'redirect_uri':get_auth_redirect_url(),

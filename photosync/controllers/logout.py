@@ -9,6 +9,8 @@ log = logging.getLogger(__name__)
 
 class LogoutController(BaseController):
 
+    requires_logged_in_user = False
+
     def index(self):
         session.clear()
         session.save()

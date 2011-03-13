@@ -12,6 +12,8 @@ log = logging.getLogger(__name__)
 
 class FbauthController(BaseController):
 
+    requires_logged_in_user = False
+
     def index(self):
         code = request.GET.getone('code')
         token = fb.get_access_token(code)

@@ -7,14 +7,21 @@
 
   <fieldset>
     <legend>Facebook Settings</legend>
+    %if c.has_fb_account:
     <div class="row">
       <label>Facebook Privacy:</label>
       ${h.select('fb_privacy', c.fb_privacy_setting, c.fb_privacy_options)}
     </div>
+    %else:
+    <a class="big-button" href="${c.fb_connect_url}">
+      Log in with your Facebook account
+    </a>
+    %endif
   </fieldset>
 
   <fieldset>
     <legend>Flickr Settings</legend>
+    %if c.has_flickr_account:
     <div class="row">
       ${h.checkbox('select_sets', value=1, checked=c.select_sets, label="Only sync the flickr sets I choose")}
     </div>
@@ -29,6 +36,12 @@
         % endfor
       </ul>
     </div>
+    %else:
+    <a class="big-button" href="${c.flickr_connect_url}">
+      Log in with your Flickr account
+    </a>
+
+    %endif
   </fieldset>
 
   <%def name="buttons()">
