@@ -11,3 +11,4 @@ worker.pid
 *.egg
 env
 development.ini
+*.log
