@@ -53,7 +53,7 @@
       ${next.body()}
     </div>
     <div id="footer" class="container">
-      &copy; 2010 Paul Carduner and Friends
+      &copy; 2011 Paul Carduner
     </div>
     <div id="fb-root"></div>
     <script src="http://connect.facebook.net/en_US/all.js"></script>
