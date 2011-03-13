@@ -41,7 +41,7 @@ class FlickrauthController(BaseController):
             user = User(flickr_nsid=nsid, flickr_token=token)
             Session.add(user)
             Session.commit()
-            user = Session.query(User).filter_by(flickr_nsid=flickr_nsid).first()
+            user = Session.query(User).filter_by(flickr_nsid=nsid).first()
 
         session['user_id'] = user.id
         session['flickr_token'] = token
