@@ -55,7 +55,7 @@ def get_access_token(code):
         response = urllib2.urlopen(url)
         return urlparse.parse_qs(response.read())['access_token'][0]
     except urllib2.URLError, e:
-        log.error("got url error %r", e);
+        log.error("Failed to get access token for code %r: %s", code, e.read())
         return None
 
 
@@ -91,6 +91,8 @@ class File(object):
     def __repr__(self):
         return repr(self.path)
 
+class GraphException(Exception):
+    pass
 
 class Graph(object):
 
@@ -105,6 +107,8 @@ class Graph(object):
                     session.save()
                     access_token = user.fb_access_token
 
+        if not access_token:
+            raise GraphException("Failed to get access token and none provided")
         self.access_token = access_token
         self.cache = cache
         self._cache = {}

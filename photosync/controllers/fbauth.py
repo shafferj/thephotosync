@@ -7,6 +7,8 @@ from photosync.lib.base import BaseController, render
 from photosync import fb
 from photosync.model import User
 from photosync.model.meta import Session
+from photosync.lib import helpers as h
+
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +24,13 @@ class FbauthController(BaseController):
             # redirect to the server that wants the auth code
             redirect(nexturl+'?code=%s' % code)
             return
+
         token = fb.get_access_token(code)
+        if not token:
+            #lame... this failed for some reason
+            h.flash("The login process failed :(")
+            redirect(url('index'))
+            return
         fbuser = fb.GraphUser(access_token=token)
 
         if session.get('user_id'):
