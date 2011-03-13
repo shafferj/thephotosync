@@ -38,6 +38,8 @@ class FbauthController(BaseController):
             Session.add(user)
             Session.commit()
             user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
+            if not user:
+                log.error("Failed to create user with fb_uid=%r", fbuser.id)
 
         if not user:
             log.error("Trying to log in, but couldn't get a user object. "

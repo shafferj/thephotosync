@@ -86,7 +86,12 @@ def submit_advanced(handler, args, kwargs, **put_kwargs):
         except TypeError:
             tube = DEFAULT_TUBE
 
-    connection.use(tube)
+    try:
+        connection.use(tube)
+    except beanstalkc.UnexpectedResponse, e:
+        log.exception(e)
+        log.error("Got an unexpected beanstalk response using tube %s. Retrying", tube)
+        connection.use(tube)
     id = connection.put(data, **put_kwargs)
     return id
 
