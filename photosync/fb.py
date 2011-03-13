@@ -29,7 +29,12 @@ def get_graph_url(path, args=None):
                     ])
 
 def get_auth_redirect_url():
-    return g.BASE_URL + u'/fb/auth_redirect'
+    auth_server = getattr(g, 'FB_AUTH_SERVER', None)
+    if auth_server:
+        return u'%s/fb/auth_redirect?nexturl=%s/fb/auth_redirect' % (
+            auth_server, g.BASE_URL)
+    else:
+        return u'%s/fb/auth_redirect' % g.BASE_URL
 
 def get_authorization_url(scope=['user_photos',
                                  'publish_stream',

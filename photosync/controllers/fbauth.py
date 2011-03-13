@@ -16,6 +16,12 @@ class FbauthController(BaseController):
 
     def index(self):
         code = request.GET.getone('code')
+        nexturl = request.GET.getone('nexturl')
+        if nexturl:
+            # we are acting only as an auth server.
+            # redirect to the server that wants the auth code
+            redirect(nexturl+'?code=%s' % code)
+            return
         token = fb.get_access_token(code)
         fbuser = fb.GraphUser(access_token=token)
 
