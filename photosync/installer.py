@@ -58,4 +58,7 @@ class PhotosyncInstaller(PylonsInstaller):
         vars['port'] = prompt("Run the server on port", default="8080")
 
         vars['admin_fb_uids'] = prompt("Your facebook user id (for admin rights)")
+
+        vars['google_analytics_id'] = prompt("Your google analytics id")
+        vars['help_email'] = prompt("Help email (displayed on error pages)")
         return super(PhotosyncInstaller, self).config_content(command, vars)

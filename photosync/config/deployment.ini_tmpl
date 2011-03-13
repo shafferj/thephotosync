@@ -42,6 +42,8 @@ photosync.FLICKR_API_SECRET = ${flickr_api_secret}
 photosync.DEFAULT_BEANSTALK = localhost:11300
 photosync.DEFAULT_BEANSTALK_TUBE = default
 photosync.FB_GRAPH_ENDPOINT = graph.facebook.com
+photosync.HELP_EMAIL = ${help_emai}
+photosync.GOOGLE_ANALYTICS_ID = ${google_analytics_id}
 
 
 
