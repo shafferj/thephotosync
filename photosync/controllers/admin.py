@@ -32,6 +32,8 @@ class AdminController(AdminController):
         c.total_tin = 0
         c.total_tout = 0
         for user_id, tin, tout in data:
+            tin = tin or 0
+            tout = tout or 0
             bandwidth_cost = cost.get_bandwidth_cost(tin,tout)
             c.total_cost += bandwidth_cost
             c.total_tout += int(tout)
