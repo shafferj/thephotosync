@@ -43,6 +43,17 @@ fieldset legend {
   width: 100%;
 }
 
+table th {
+  padding: 5px;
+  font-weight: bold;
+}
+table tr {
+  border-bottom: 1px solid #777;
+}
+table td {
+  padding: 5px;
+}
+
 #settings {
     position: absolute;
     margin: auto;
