@@ -267,8 +267,16 @@ class FullSync(TaskHandler):
             sync.transfer_in = os.path.getsize(temp_filename)
             log.info("Uploading image %s to facebook", temp_filename)
             graph_photo = None
+            title = photo.get('title')
             try:
-                graph_photo = album.photos.add(temp_filename, photo.get('title'))
+                title = title.encode('utf-8')
+            except UnicodeEncodeError, e:
+                log.error("Failed to encode %s to utf-8", title)
+                log.exception(e)
+                # better a photo with no title than no photo at all.
+                title = ""
+            try:
+                graph_photo = album.photos.add(temp_filename, title)
             except TypeError, e:
                 log.error("Error uploading image %s", temp_filename)
                 log.exception(e)

@@ -146,7 +146,7 @@ class Graph(object):
                 field = (key, (c.FORM_FILE, value.path))
             else:
                 try:
-                    field = (key, unicode(value).encode('ascii'))
+                    field = (key, value)
                 except Exception, e:
                     log.error("Could not convert %s to ascii", value)
                     log.exception(e)
