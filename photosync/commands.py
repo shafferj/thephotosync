@@ -23,9 +23,12 @@ class KickCommand(BaseCommand):
             .filter(User.fb_uid != None)\
             .filter(User.flickr_nsid != None)
 
+        if self.options.simulate:
+            log.info("--SIMULATING--")
         for user in users:
             tasks = AsyncTask.get_for_user(user.id)
             for task in tasks:
                 if not (task.is_completed or task.time_left):
                     log.info("Running task %r", task)
-                    task.run_now()
+                    if not self.options.simulate:
+                        task.run_now()
