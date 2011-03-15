@@ -66,6 +66,8 @@ class BaseCommand(Command):
                 self.cmd = None
                 self.restvars = self.args[:]
 
+        self.logging_file_config(app_spec)
+
         config_name = 'config:%s' % app_spec
         here_dir = os.getcwd()
 
