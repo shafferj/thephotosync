@@ -28,7 +28,7 @@ class KickCommand(BaseCommand):
         for user in users:
             tasks = AsyncTask.get_for_user(user.id)
             for task in tasks:
-                if not (task.is_completed or task.time_left):
+                if not (task.is_completed or task.time_left) and task.is_buried:
                     log.info("Running task %r", task)
                     if not self.options.simulate:
                         task.run_now()
