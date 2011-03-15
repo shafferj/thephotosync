@@ -28,7 +28,7 @@ class BaseCommand(Command):
     """
 
 
-    CONFIG_SECTION = 'photosync:worker'
+    CONFIG_SECTION = 'app:main'
     requires_config_file = True
     takes_config_file = True
 

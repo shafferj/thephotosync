@@ -20,8 +20,6 @@ from photosync.worker.run import run_worker
 from photosync.model import init_model
 from photosync.lib.commands_util import BaseCommand
 
-CONFIG_SECTION = 'photosync:worker'
-
 class RunWorkerCommand(BaseCommand):
     """Start a beanstalk worker
 
@@ -43,7 +41,7 @@ class RunWorkerCommand(BaseCommand):
             if key not in self.config:
                 raise BadCommand(
                     'Error: %s %s configuration section is missing a '
-                    'value for %s' % (app_spec, CONFIG_SECTION, key))
+                    'value for %s' % (app_spec, self.CONFIG_SECTION, key))
             return self.config[key]
 
         host, port = get_or_raise('server').split(':')
