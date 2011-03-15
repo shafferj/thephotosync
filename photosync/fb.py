@@ -152,7 +152,11 @@ class Graph(object):
                     log.exception(e)
             post_fields.append(field)
 
-        c.setopt(c.URL, self.get_url(path))
+        try:
+            c.setopt(c.URL, self.get_url(path))
+        except TypeError, e:
+            log.error("Invalid url %s for pycurl url option", self.get_url(path))
+            raise
         c.setopt(c.HTTPPOST, post_fields)
         c.setopt(c.VERBOSE, 1)
         response = StringIO.StringIO()
