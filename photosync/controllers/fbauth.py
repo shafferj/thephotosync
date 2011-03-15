@@ -49,13 +49,16 @@ class FbauthController(BaseController):
         else:
             # the user does not have an account.  We need to create a new one
             # for them.
-            user = User(fb_uid=fbuser.id,
-                        fb_access_token=token)
-            Session.add(user)
-            Session.commit()
-            user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
-            if not user:
-                log.error("Failed to create user with fb_uid=%r", fbuser.id)
+            for attempt in xrange(3):
+                user = User(fb_uid=fbuser.id,
+                            fb_access_token=token)
+                Session.add(user)
+                Session.commit()
+                user = Session.query(User).filter_by(fb_uid=fbuser.id).first()
+                if user:
+                    break
+                log.error("Failed to create user with fb_uid=%r attempt %r",
+                          fbuser.id, attempt)
 
         if not user:
             log.error("Trying to log in, but couldn't get a user object. "
