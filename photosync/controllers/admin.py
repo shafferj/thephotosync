@@ -33,6 +33,7 @@ class AdminController(AdminController):
             .group_by(SyncRecord.user_id).all()
 
         c.user_stats = []
+        c.total_count = 0
         c.total_cost = 0
         c.total_tin = 0
         c.total_tout = 0
@@ -43,6 +44,7 @@ class AdminController(AdminController):
             c.total_cost += bandwidth_cost
             c.total_tout += int(tout)
             c.total_tin += int(tin)
+            c.total_count += count
             c.user_stats.append([User.get_by_id(user_id),
                                  count,
                                  round(tin/1024/1024, 2),
@@ -51,7 +53,8 @@ class AdminController(AdminController):
         c.total_tout = round(c.total_tout/1024./1024, 2)
         c.total_tin = round(c.total_tin/1024./1024, 2)
 
-        data.sort(key=lambda d: d[-1])
+        order_by = int(request.GET.get('order_by', 4))
+        c.user_stats.sort(key=lambda d: d[order_by], reverse=True)
         return render('/admin/stats.mako')
 
     def index(self):

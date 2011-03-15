@@ -11,12 +11,12 @@
   <h3>Top Users</h3>
   <table>
     <tr>
-      <th>Id</th>
-      <th>User</th>
-      <th>Sync Records</th>
-      <th>MB In</th>
-      <th>MB Out</th>
-      <th>Cost</th>
+      <th><a href="${url('admin-stats', order_by=0)}">Id</a></th>
+      <th><a href="${url('admin-stats', order_by=0)}">User</a></th>
+      <th><a href="${url('admin-stats', order_by=1)}">Sync Records</a></th>
+      <th><a href="${url('admin-stats', order_by=2)}">MB In</a></th>
+      <th><a href="${url('admin-stats', order_by=3)}">MB Out</a></th>
+      <th><a href="${url('admin-stats', order_by=4)}">Cost</a></th>
     </tr>
     %for user, count, tin, tout, cost in c.user_stats:
     <tr>
@@ -38,8 +38,8 @@
     %endfor
     <tr>
       <td>Totals:</td>
-      <td></td>
-      <td></td>
+      <td>${len(c.user_stats)}</td>
+      <td>${c.total_count}</td>
       <td>${c.total_tin}MB</td>
       <td>${c.total_tout}MB</td>
       <td>$${c.total_cost}</td>

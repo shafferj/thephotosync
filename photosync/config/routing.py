@@ -38,4 +38,5 @@ def make_map(config):
 
 
     map.connect('admin', '/admin/', controller='admin', action='index')
+    map.connect('admin-stats', '/admin/stats', controller='admin', action='stats')
     return map
