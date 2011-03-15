@@ -44,5 +44,6 @@ setup(
     [paste.paster_command]
     runworker = photosync.worker.commands:RunWorkerCommand
     migrate = photosync.migrations.commands:RunMigrationCommand
+    kick = photosync.commands:KickCommand
     """,
 )

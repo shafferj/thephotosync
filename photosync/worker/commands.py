@@ -1,23 +1,6 @@
-import os
-import ConfigParser
-import errno
-import threading
-import atexit
-import logging
-import subprocess
-import time
-
-import paste.fixture
-import paste.registry
 from paste.script.command import Command, BadCommand
-from paste.script.serve import DaemonizeException
-from paste.script.serve import LazyWriter
-from paste.script.serve import live_pidfile, read_pidfile, _remove_pid_file
-from paste.deploy import loadapp
-from sqlalchemy import engine_from_config
 
 from photosync.worker.run import run_worker
-from photosync.model import init_model
 from photosync.lib.commands_util import BaseCommand
 
 class RunWorkerCommand(BaseCommand):

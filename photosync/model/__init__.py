@@ -70,6 +70,10 @@ class AsyncTask(Base):
     user_id = Column('user_id', Integer, ForeignKey('users.id'))
     user = relation('User', backref=backref('async_tasks', order_by=last_update_time))
 
+    def __repr__(self):
+        return "<%s id=%r user_id=%r queue_id=%r>" % (
+            self.__class__.__name__, self.id, self.user_id, self.queue_id)
+
     def __init__(self, user_id=None, type=None):
         user_id = user_id or session.get('user_id')
         if not user_id:
