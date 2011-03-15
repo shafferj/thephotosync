@@ -145,7 +145,11 @@ class Graph(object):
             if isinstance(value, File):
                 field = (key, (c.FORM_FILE, value.path))
             else:
-                field = (key, value)
+                try:
+                    field = (key, unicode(value).encode('ascii'))
+                except Exception, e:
+                    log.error("Could not convert %s to ascii", value)
+                    log.exception(e)
             post_fields.append(field)
 
         c.setopt(c.URL, self.get_url(path))
