@@ -164,8 +164,8 @@ class FullSync(TaskHandler):
             sync.flickrid = photoset.get('id')
 
             album = self.fb_user.albums.add(
-                photoset.find('title').text,
-                photoset.find('description').text,
+                photoset.find('title').text.encode('utf-8'),
+                photoset.find('description').text.encode('utf-8'),
                 privacy=self.fb_privacy)
 
             if album:
