@@ -41,7 +41,7 @@ class TaskHandler(object):
         return self.__task
 
     def set_status(self, completed, total, data):
-        log.info("%s %s Completed %s/%s: %r",
+        log.debug("%s %s Completed %s/%s: %r",
                  self.__class__.__name__, self.job.jid,
                  completed, total, data)
         self.job.touch()
@@ -145,17 +145,18 @@ class FullSync(TaskHandler):
             if not select_sets or photoset.get('id') in selected_sets:
                 self.sync_photoset(photoset)
 
+        log.info("Finished job %r for user %r", self.job.jid, self.user.id)
         # once we are all done, let's submit the task to rerun in an hour.
         self.resubmit(delay=60*60)
 
     def sync_photoset(self, photoset):
-        log.info("Syncing flickr photoset %s to facebook", photoset.get('id'))
+        log.debug("Syncing flickr photoset %s to facebook", photoset.get('id'))
         sync = Session.query(SyncRecord).filter_by(
             flickrid=photoset.get('id'), type=SyncRecord.TYPE_ALBUM).first()
         album = None
         if sync and sync.success:
             # don't resync unless we failed before
-            log.info("skipping... already synced")
+            log.debug("skipping... already synced")
             album = fb.GraphAlbum(id=sync.fbid, access_token=self.user.fb_access_token)
             if not album.data:
                 album = None
@@ -185,11 +186,11 @@ class FullSync(TaskHandler):
 
         photos_to_sync = []
         for photo in photos:
-            log.info("Syncing flickr photo %s to facebook", photo.get('id'))
+            log.debug("Syncing flickr photo %s to facebook", photo.get('id'))
             sync = SyncRecord.get_for_flickrid(photo.get('id')).first()
             fb_photo = None
             if sync and sync.fbid and sync.success:
-                log.info("Skipping... already synced")
+                log.debug("Skipping... already synced")
                 fb_photo = fb.GraphPhoto(id=sync.fbid, access_token=self.user.fb_access_token)
                 #if not fb_photo.data:
                 #    fb_photo = None
@@ -249,7 +250,7 @@ class FullSync(TaskHandler):
                 #import pdb; pdb.set_trace()
                 raise
             filename = '/tmp/photosync/flickr-'+sync.flickrid+'.jpg'
-            log.info("Downloading image %s to %s", img_url, filename)
+            log.debug("Downloading image %s to %s", img_url, filename)
             img_request = None
             if not os.path.exists(filename):
                 f = open(filename, 'wb')
@@ -267,7 +268,7 @@ class FullSync(TaskHandler):
 
         for photo, temp_filename, sync, img_request in img_requests:
             sync.transfer_in = os.path.getsize(temp_filename)
-            log.info("Uploading image %s to facebook", temp_filename)
+            log.debug("Uploading image %s to facebook", temp_filename)
             graph_photo = None
             title = photo.get('title')
             try:

@@ -50,7 +50,7 @@ def get_access_token(code):
                          'redirect_uri':get_auth_redirect_url(),
                          'client_secret':g.FB_APP_SECRET,
                          'code':code})
-    log.info("Sending request to url %s", url);
+    log.debug("Sending request to url %s", url);
     try:
         response = urllib2.urlopen(url)
         return urlparse.parse_qs(response.read())['access_token'][0]
@@ -120,7 +120,7 @@ class Graph(object):
         result = self._cache.get(path)
 
         if not result:
-            log.info("Loading %s", path)
+            log.debug("Loading %s", path)
             try:
                 result = json.loads(urllib2.urlopen(self.get_url(path)).read())
             except urllib2.HTTPError, e:
@@ -132,13 +132,13 @@ class Graph(object):
         return result
 
     def post(self, path, data):
-        log.info("Posting data to %s: %r", path, data)
+        log.debug("Posting data to %s: %r", path, data)
         response = urllib2.urlopen(self.get_url(path), urllib.urlencode(data))
         result = json.loads(response.read())
         return result
 
     def post_file(self, path, data):
-        log.info("Posting data to %s: %r", path, data)
+        log.debug("Posting data to %s: %r", path, data)
         c = pycurl.Curl()
         post_fields = []
         for key, value in data.items():
