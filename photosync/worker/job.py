@@ -21,23 +21,16 @@ DEFAULT_BEANSTALK = 'localhost:11300'
 def get_handler_name(handler):
     return '%s:%s' % (handler.__module__, handler.__name__)
 
-def register(tube=None, server=None):
-    def decorator(func):
-        if inspect.isclass(func):
-            @wraps(func)
-            def caller(job, *args, **kwargs):
-                instance = func(job, *args, **kwargs)
-                return instance()
-            register_handler(caller, tube=tube, server=server)
-        else:
-            register_handler(func, tube=tube, server=server)
-        return func
-
-    if callable(tube) or inspect.isclass(tube):
-        func = tube
-        tube = None
-        return decorator(func)
-    return decorator
+def register(func):
+    if inspect.isclass(func):
+        @wraps(func)
+        def caller(job, *args, **kwargs):
+            instance = func(job, *args, **kwargs)
+            return instance()
+        register_handler(caller)
+    else:
+        register_handler(func)
+    return func
 
 
 _connection = None
@@ -51,10 +44,8 @@ def _get_connection():
         _connection = beanstalkc.Connection(host=host, port=int(port))
     return _connection
 
-
-def register_handler(handler, tube=None, server=None):
-    _handlers[get_handler_name(handler)] = {'handler':handler,
-                                            'tube':tube}
+def register_handler(handler):
+    _handlers[get_handler_name(handler)] = handler
 
 def from_id(id):
     if id is None:
@@ -78,13 +69,12 @@ def submit_advanced(handler, args, kwargs, **put_kwargs):
 
     connection = _get_connection()
 
-    tube = handler_config.get('tube')
-    if not tube:
-        try:
-            # TODO: stop using pylons global object for configuration
-            tube = g.DEFAULT_BEANSTALK_TUBE
-        except TypeError:
-            tube = DEFAULT_TUBE
+    try:
+        # TODO: stop using pylons global object for configuration
+        # because it is not always available
+        tube = g.DEFAULT_BEANSTALK_TUBE
+    except TypeError:
+        tube = DEFAULT_TUBE
 
     try:
         connection.use(tube)
@@ -126,7 +116,7 @@ class Job(object):
     @property
     def handler(self):
         name = self.data['handler']
-        return _handlers[name]['handler']
+        return _handlers[name]
 
     @property
     def queue_id(self):
