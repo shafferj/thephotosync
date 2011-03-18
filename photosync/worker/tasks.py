@@ -133,7 +133,7 @@ class FullSync(TaskHandler):
         if not self.user.verify_user():
             # not really much we can do about this...
             log.info("Missing tokens for user %r", self.user)
-            self.set_status("You need to log out and log back in again.")
+            self.set_status(0, 0, "You need to log out and log back in again.")
             return
         self.fk = flickr.FlickrAPI(self.user.flickr_token)
         self.fb_user = fb.GraphUser(access_token=self.user.fb_access_token)
