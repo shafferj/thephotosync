@@ -4,12 +4,37 @@ from functional import compose
 from itertools import imap, izip, starmap
 
 from photosync import flickr
+from photosync import fb
 from photosync.model import User, SyncRecord
 from photosync.model.meta import Session
 from photosync import http
 
 
-__all__ = ['load_transfer_data']
+__all__ = [
+    'load_transfer_data',
+    'delete_empty_albums'
+    ]
+
+
+def delete_empty_albums():
+    """Delete empty albums that were accidentally created."""
+
+    records = Session.query(SyncRecord).filter(
+        SyncRecord.type==SyncRecord.TYPE_ALBUM).all()
+
+    for record in records:
+        user = record.user
+        if user.fb_access_token:
+            fbalbum = fb.GraphAlbum(
+                id=record.fbid,
+                access_token=user.fb_access_token)
+            if len(fbalbum.photos) == 0:
+                #this is an empty album... let's delete it.
+                print "Deleting album %r for user %r" % (record.fbid, user)
+                fbalbum.delete()
+                #Session.delete(record)
+    print "All done"
+
 
 def load_transfer_data():
     """Loads bytes transferred data into the db.

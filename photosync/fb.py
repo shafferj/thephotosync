@@ -216,6 +216,10 @@ class GraphObject(GraphEndpoint):
             self._id = id
             self.path = '/%s' % id
 
+    def delete(self):
+        """Delete the object being referenced"""
+        return self.post(self.path, {'method':'delete'})
+
 
 class GraphObjectList(GraphEndpoint):
 
