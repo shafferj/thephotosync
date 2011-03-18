@@ -115,6 +115,16 @@ class LongPing(TaskHandler):
 class FullSync(TaskHandler):
 
     @classmethod
+    def run_for_user_now(cls, user_id):
+        last = AsyncTask.get_for_user(user_id=user_id,
+                                      type=cls.get_type(),
+                                      limit=1).first()
+        if not last or last.is_completed:
+            cls.submit_advanced((user_id,), {}, user_id=user_id)
+        else:
+            last.run_now()
+
+    @classmethod
     def get_initial_status(cls):
         return (None, None, "Waiting for syncer to become available...")
 

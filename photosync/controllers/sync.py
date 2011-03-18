@@ -24,13 +24,7 @@ class SyncController(BaseController):
         redirect(url('index'))
 
     def full_sync(self):
-        last = AsyncTask.get_for_user(type=tasks.FullSync.get_type(),
-                                      limit=1).first()
-
-        if not last or last.is_completed:
-            tasks.FullSync.submit(session.get('user_id'))
-        else:
-            last.run_now()
+        tasks.FullSync.run_for_user_now(self.logged_in_user.id)
         redirect(url('index'))
 
     def status(self):
