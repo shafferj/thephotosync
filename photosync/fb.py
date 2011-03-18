@@ -252,7 +252,7 @@ class GraphAlbums(GraphObjectList):
         if privacy:
             params['privacy'] = json.dumps(privacy)
         result = self.post(self.path, params)
-        if result.get('id'):
+        if result and result.get('id'):
             return GraphAlbum(id=result.get('id'), access_token=self.access_token)
         return None
 
