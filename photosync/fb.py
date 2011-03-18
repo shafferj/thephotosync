@@ -136,7 +136,7 @@ class Graph(object):
                 except ValueError:
                     pass
                 else:
-                    if data.get('type') == 'OAuthException':
+                    if data.get('error', {}).get('type') == 'OAuthException':
                         raise OAuthException(data.get('message'))
                 result = None
             else:
