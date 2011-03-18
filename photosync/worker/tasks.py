@@ -188,6 +188,9 @@ class FullSync(TaskHandler):
                 sync.status = SyncRecord.STATUS_FAILED
             Session.add(sync)
             Session.commit()
+            self.set_status(self.synced_photos, self.total_photos,
+                            "Failed to sync %s" % title)
+            return
 
         photos = self.fk.photosets_getPhotos(photoset_id=photoset.get('id'))[0]
 
