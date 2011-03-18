@@ -130,6 +130,11 @@ class FullSync(TaskHandler):
 
     def run(self, user_id):
         self.user = User.get_by_id(user_id)
+        if not self.user.verify_user():
+            # not really much we can do about this...
+            log.info("Missing tokens for user %r", self.user)
+            self.set_status("You need to log out and log back in again.")
+            return
         self.fk = flickr.FlickrAPI(self.user.flickr_token)
         self.fb_user = fb.GraphUser(access_token=self.user.fb_access_token)
         photosets = self.fk.photosets_getList()[0]

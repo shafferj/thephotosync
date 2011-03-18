@@ -13,7 +13,8 @@ from photosync.model.meta import Session, Base
 from photosync.model.json import Json
 from photosync.model.settings import UserSetting
 from photosync.worker import job
-
+from photosync import fb
+from photosync import flickr
 
 def init_model(engine):
     """Call me before using any of the tables or classes in the model"""
@@ -40,6 +41,29 @@ class User(Base):
     def __repr__(self):
         return "<User id=%s fb_uid=%s flickr_nsid=%s>" % (
             self.id, self.fb_uid, self.flickr_nsid)
+
+    def verify_user(self):
+        """Check the access tokens"""
+        if self.fb_access_token:
+            fbuser = fb.GraphUser(access_token=self.fb_access_token)
+            try:
+                fbuser.load()
+            except fb.OAuthException, e:
+                self.fb_access_token = None
+                Session.commit()
+                return False
+
+        if self.flickr_token:
+            fluser = flickr.FlickrUser(token=self.flickr_token)
+            try:
+                fluser.auth_checkToken()
+            except flickr.FlickrError, e:
+                self.flickr_token = None
+                Session.commit()
+                return False
+
+        return bool(self.flickr_token and self.fb_access_token)
+
 
     __str__ = __unicode__
 

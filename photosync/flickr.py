@@ -1,15 +1,16 @@
 import flickrapi
 import urllib
 from pylons import session, app_globals as g
+from flickrapi import FlickrError
 
 from photosync.lazy import lazy
-from photosync.model import User
 
 class FlickrAPI(flickrapi.FlickrAPI):
 
     def __init__(self, token=None):
         if not token:
             if 'user_id' in session:
+                from photosync.model import User
                 user = User.get_current_user()
                 if user and user.flickr_token:
                     token = user.flickr_token

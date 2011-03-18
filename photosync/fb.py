@@ -96,6 +96,9 @@ class File(object):
 class GraphException(Exception):
     pass
 
+class OAuthException(GraphException):
+    pass
+
 class Graph(object):
 
     def __init__(self, access_token=None, cache=True):
@@ -126,7 +129,15 @@ class Graph(object):
             try:
                 result = json.loads(urllib2.urlopen(self.get_url(path)).read())
             except urllib2.HTTPError, e:
-                log.warn("Failed to load %s: %s", self.get_url(path), e.read())
+                data = e.read()
+                log.warn("Failed to load %s: %s", self.get_url(path), data)
+                try:
+                    data = json.loads(data)
+                except ValueError:
+                    pass
+                else:
+                    if data.get('type') == 'OAuthException':
+                        raise OAuthException(data.get('message'))
                 result = None
             else:
                 if self.cache:
@@ -182,7 +193,10 @@ class GraphEndpoint(Graph):
 
     path = None
 
-    data = property(lambda self: self.get(self.path))
+    data = property(lambda self: self.load())
+
+    def load(self):
+        return self.get(self.path)
 
     def __repr__(self):
         return '<%s %s %r>' % (self.__class__.__name__,
