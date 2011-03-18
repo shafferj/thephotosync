@@ -135,9 +135,12 @@ class Graph(object):
 
     def post(self, path, data):
         log.debug("Posting data to %s: %r", path, data)
-        response = urllib2.urlopen(self.get_url(path), urllib.urlencode(data))
-        result = json.loads(response.read())
-        return result
+        try:
+            response = urllib2.urlopen(self.get_url(path), urllib.urlencode(data))
+        except urllib2.HTTPError, e:
+            log.error("Failed to load %s: %s", self.get_url(path), e.read())
+            return None
+        return json.loads(response.read())
 
     def post_file(self, path, data):
         log.debug("Posting data to %s: %r", path, data)
