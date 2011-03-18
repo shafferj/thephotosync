@@ -13,6 +13,8 @@ from photosync.lazy import lazy
 
 log = logging.getLogger(__name__)
 
+def utf8(val):
+    return unicode(val).encode('utf-8')
 
 def get_graph_url(path, args=None):
     args = args or {}
@@ -146,14 +148,14 @@ class Graph(object):
                 field = (key, (c.FORM_FILE, value.path))
             else:
                 try:
-                    field = (key, value)
+                    field = (key, utf8(value))
                 except Exception, e:
                     log.error("Could not convert %s to ascii", value)
                     log.exception(e)
             post_fields.append(field)
 
         try:
-            c.setopt(c.URL, self.get_url(path))
+            c.setopt(c.URL, self.get_url(utf8(path)))
         except TypeError, e:
             log.error("Invalid url %s for pycurl url option", self.get_url(path))
             raise
